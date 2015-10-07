@@ -1,0 +1,22 @@
+{
+  "name": "volbriosd",
+  "version": "0.0.1",
+  "description": "volume and brightness control",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kba/volbriosd"
+  },
+  "author": "kba",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kba/volbriosd/issues"
+  },
+  "dependencies": {
+    "cson": "^3.0.2",
+    "node-notifier": "^4.3.1"
+  }
+}
