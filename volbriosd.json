@@ -1,0 +1,7 @@
+{
+  "notify": {
+    "backend": "yad",
+    "style": "ascii",
+    "fillchar": "X"
+  }
+}

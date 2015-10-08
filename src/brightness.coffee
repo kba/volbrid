@@ -1,11 +1,8 @@
-module.exports = class Volume
+module.exports = class Brightness
 
 	constructor: (@config) ->
 
 	get: (cb) ->
-		throw "Not implemented"
-
-	toggle_mute: (cb) ->
 		throw "Not implemented"
 
 	inc: (perc, cb) ->
