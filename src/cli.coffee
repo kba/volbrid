@@ -3,7 +3,8 @@ DeepMerge = require './deepmerge'
 CONFIG =
 	volume:
 		backend: "pacmd"
-		step: 5
+		step: 10
+		max: 250
 	brightness:
 		backend: "xbacklight"
 		step: 10

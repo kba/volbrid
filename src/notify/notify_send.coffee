@@ -5,19 +5,19 @@ module.exports = class NotifySend extends Notify
 		args = [
 			"--icon=#{@_icon_for_volume(perc, muted)}"
 			"--expire-time=#{@config.notify.timeout}"
+			"--hint=string:synchronous:volume"
 		]
-		if muted
-			args.push " "
-		else
-			switch @config.notify.style
-				when 'ascii'
-					args.push "VOLUME: #{perc}%"
-					args.push "<big><tt>#{@_create_ascii_bar(perc)}%</tt></big>"
-				when 'value'
-					args.push "--text=<big><tt>VOLUME: #{perc}%</tt></big>"
-				when 'progress'
-					args.push "--hint=int:value:#{perc}"
-					args.push "--hint=string:synchronous:volume"
+		switch @config.notify.style
+			when 'ascii'
+				args.push "VOLUME: #{perc}%"
+				args.push "<big><tt>#{@_create_ascii_bar(perc, max)}%</tt></big>"
+			when 'value'
+				args.push "VOLUME #{perc}"
+				args.push "<big><tt>#{@_create_ascii_bar(perc, max)}%</tt></big>"
+			when 'progress'
+				args.push "--hint=int:value:#{perc * 100 / @config.volume.max}"
+				args.push "--hint=string:synchronous:volume"
+				args.push "VOLUME #{perc}"
 		@_exec 'notify-send', args, cb
 
 
