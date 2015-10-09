@@ -1,6 +1,5 @@
 {
   "notify": {
-    "backend": "notify_send",
-    "style": "ascii"
+    "backend": "notify_send"
   }
 }

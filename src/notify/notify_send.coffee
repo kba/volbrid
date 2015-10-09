@@ -9,11 +9,10 @@ module.exports = class NotifySend extends Notify
 		]
 		switch @config.notify.style
 			when 'ascii'
-				args.push "VOLUME: #{perc}%"
-				args.push "<big><tt>#{@_create_ascii_bar(perc, max)}%</tt></big>"
+				args.push "VOLUME: #{perc}"
+				args.push "<big><tt>#{@_create_ascii_bar(perc, @config.volume.max)}</tt></big>"
 			when 'value'
 				args.push "VOLUME #{perc}"
-				args.push "<big><tt>#{@_create_ascii_bar(perc, max)}%</tt></big>"
 			when 'progress'
 				args.push "--hint=int:value:#{perc * 100 / @config.volume.max}"
 				args.push "--hint=string:synchronous:volume"
@@ -28,10 +27,10 @@ module.exports = class NotifySend extends Notify
 		]
 		switch @config.notify.style
 			when 'ascii'
-				args.push "BRIGHTNESS: #{perc}%"
-				args.push "<tt>#{@_create_ascii_bar(perc)}%</tt>"
+				args.push "BRIGHTNESS: #{perc}"
+				args.push "<tt>#{@_create_ascii_bar(perc, @config.brightness.max)}</tt>"
 			when 'value'
-				args.push "--text=<big><tt>BRIGHTNESS: #{perc}%</tt></big>"
+				args.push "--text=<big><tt>BRIGHTNESS: #{perc}</tt></big>"
 			when 'progress'
 				args.push "--hint=int:value:#{perc}"
 				args.push "--hint=string:synchronous:brightness"

@@ -8,6 +8,7 @@ CONFIG =
 	brightness:
 		backend: "xbacklight"
 		step: 10
+		max: 100
 	notify:
 		backend: "notify_send"  # notify_send, yad
 		timeout: 50  # in ms

@@ -19,7 +19,7 @@ module.exports = class Yad extends Notify
 					args.push "--progress-text=Volume #{perc}%"
 					args.push "--percentage=#{perc}"
 				when 'ascii'
-					args.push "--text=<big><tt>VOLUME: #{perc}%\n#{@_create_ascii_bar(perc)}</tt></big>"
+					args.push "--text=<big><tt>VOLUME: #{perc}%\n#{@_create_ascii_bar(perc, @config.volume.max)}</tt></big>"
 				when 'value'
 					args.push "--text=<big><tt>VOLUME: #{perc}%</tt></big>"
 		@_exec 'yad', args, cb
@@ -40,7 +40,7 @@ module.exports = class Yad extends Notify
 				args.push "--progress"
 				args.push "--percentage=#{perc}"
 			when 'ascii'
-				args.push "--text=<big><tt>BRIGHTNESS: #{parseInt(perc)}%\n#{@_create_ascii_bar(perc)}</tt></big>"
+				args.push "--text=<big><tt>BRIGHTNESS: #{parseInt(perc)}%\n#{@_create_ascii_bar(perc, @config.brightness.max)}</tt></big>"
 			when 'value'
 				args.push "--text=<big><tt>BRIGHTNESS: #{perc}%</tt></big>"
 		@_exec 'yad', args, cb
