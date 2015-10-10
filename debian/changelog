@@ -1,0 +1,7 @@
+volbriosd (0.1.0-1) UNRELEASED; urgency=low
+
+   * Initial Release. Closes: #12345
+   * This is my first Debian package.
+   * Adjusted the Makefile to fix $(DESTDIR) problems.
+
+ -- Konstantin Baierer <konstantin.baierer@gmail.com> Fri, 9 Oct 2015 20:07:42 +0100
