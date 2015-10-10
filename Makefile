@@ -1,4 +1,6 @@
 DESTDIR = /
+PREFIX = usr
+
 VERSION = 0.1.3
 PKGNAME = volbriosd
 PANDOC = pandoc
@@ -17,17 +19,20 @@ build: docs
 	coffee -c -o lib src
 
 dist: build
-	tar czv \
+	mkdir -p $(PKGNAME)-$(VERSION)
+	cp -r -t $(PKGNAME)-$(VERSION) \
 		bin \
 		dist \
 		man \
 		lib \
 		Makefile \
 		.npmignore \
-		package.json |gzip > $(PKGNAME)-$(VERSION).tar.gz
+		package.json
+	tar czf $(PKGNAME)-$(VERSION).tar.gz $(PKGNAME)-$(VERSION)
 
 distclean: clean
+	rm -rf $(PKGNAME)-$(VERSION)
 	rm -f $(PKGNAME)-*.tar.gz
 
 install:
-	npm install --unsafe-perm --prefix=$(DESTDIR) -g
+	npm install --unsafe-perm --prefix=$(DESTDIR)/$(PREFIX) -g
