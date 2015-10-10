@@ -1,6 +1,6 @@
 {
   "name": "volbriosd",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "volume and brightness control",
   "main": "lib/index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "license": "MIT",
   "preferGlobal": true,
   "bin": {
-      "volbriosd" : "bin/volbriosd.js"
+    "volbriosd": "bin/volbriosd.js"
   },
   "bugs": {
     "url": "https://github.com/kba/volbriosd/issues"
