@@ -1,7 +1,7 @@
 DESTDIR = /
 PREFIX = usr
 
-VERSION = 0.1.3
+VERSION = $(shell grep version package.json | grep -oE '[0-9\.]+')
 PKGNAME = volbriosd
 PANDOC = pandoc
 
