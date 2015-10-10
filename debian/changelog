@@ -1,7 +1,6 @@
-volbriosd (0.1.0-1) UNRELEASED; urgency=low
+volbriosd (0.1.0-1) jessie; urgency=low
 
-   * Initial Release. Closes: #12345
-   * This is my first Debian package.
-   * Adjusted the Makefile to fix $(DESTDIR) problems.
+  * Initial Release. Closes: #12345
+  * This is my first Debian package :-)
 
- -- Konstantin Baierer <konstantin.baierer@gmail.com> Fri, 9 Oct 2015 20:07:42 +0100
+ -- Konstantin Baierer <konstantin.baierer@gmail.com>  Fri, 09 Oct 2015 20:07:42 +0100
