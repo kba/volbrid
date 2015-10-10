@@ -2,7 +2,7 @@ DESTDIR = /
 PREFIX = usr
 
 VERSION = $(shell grep version package.json | grep -oE '[0-9\.]+')
-PKGNAME = volbriosd
+PKGNAME = $(shell grep name package.json |/bin/grep -o '[^"]*",'|/bin/grep -o '[^",]*')
 PANDOC = pandoc
 
 all: dist
