@@ -2,12 +2,13 @@
 # See debhelper(7) (uncomment to enable)
 # output every command that modifies files on the build system.
 DH_VERBOSE = 1
-VERSION = 0.1.2
+VERSION = 0.1.3
 PKGNAME = volbriosd
 
 # main packaging script based on dh7 syntax
 %:
 	dh $@ 
 
-dh_override_build:
-	git archive --format tar $(VERSION)|gzip > ../$(PKGNAME)_$(VERSION).orig.tar.gz
+override_dh_clean:
+	git archive --format tar v$(VERSION)|gzip > ../$(PKGNAME)_$(VERSION).orig.tar.gz
+
