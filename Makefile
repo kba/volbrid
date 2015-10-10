@@ -32,7 +32,7 @@ dist: build
 
 distclean: clean
 	rm -rf $(PKGNAME)-$(VERSION)
-	rm -f $(PKGNAME)-*.tar.gz
+	rm -f $(PKGNAME)-$(VERSION).tar.gz
 
 install:
 	npm install --unsafe-perm --prefix=$(DESTDIR)/$(PREFIX) -g
