@@ -8,7 +8,3 @@ PKGNAME = volbriosd
 # main packaging script based on dh7 syntax
 %:
 	dh $@ 
-
-override_dh_clean:
-	git archive --format tar v$(VERSION)|gzip > ../$(PKGNAME)_$(VERSION).orig.tar.gz
-
