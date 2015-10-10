@@ -2,7 +2,7 @@ Source: volbriosd
 Section: x11
 Priority: optional
 Maintainer: Konstantin Baierer <konstantin.baierer@gmail.com>
-Build-Depends: debhelper (>=9), coffeescript (>=1.0), go-md2man (>=1-2)
+Build-Depends: debhelper (>=9), coffeescript (>=1.0), pandoc (>=1.11)
 Standards-Version: 3.9.6
 Homepage: http://github.com/kba/volbriosd
 
