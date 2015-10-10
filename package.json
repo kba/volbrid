@@ -19,6 +19,7 @@
   "bin": {
     "volbriosd": "bin/volbriosd.js"
   },
+  "man": "man/volbriosd.1.gz",
   "bugs": {
     "url": "https://github.com/kba/volbriosd/issues"
   },
