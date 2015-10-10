@@ -1,6 +1,5 @@
-volbriosd (0.1.0-1) jessie; urgency=low
+volbriosd (0.1.1-1) UNRELEASED; urgency=medium
 
-  * Initial Release. Closes: #12345
   * This is my first Debian package :-)
 
- -- Konstantin Baierer <konstantin.baierer@gmail.com>  Fri, 09 Oct 2015 20:07:42 +0100
+ -- Konstantin Baierer <konstantin.baierer@gmail.com>  Sat, 10 Oct 2015 03:04:59 +0200
