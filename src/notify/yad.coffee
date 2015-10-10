@@ -1,7 +1,7 @@
 Notify = require '../notify'
 module.exports = class Yad extends Notify
 
-	notify_volume: (perc, muted, cb) ->
+	volume: (perc, muted, cb) ->
 		args = [
 			"--on-top"
 			"--no-buttons"
@@ -24,7 +24,7 @@ module.exports = class Yad extends Notify
 					args.push "--text=<big><tt>VOLUME: #{perc}%</tt></big>"
 		@_exec 'yad', args, cb
 
-	notify_brightness: (perc, muted, cb) ->
+	brightness: (perc, muted, cb) ->
 		args = [
 			"--on-top"
 			"--no-buttons"

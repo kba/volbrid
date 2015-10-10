@@ -1,6 +1,6 @@
 ChildProcess = require 'child_process'
 Volume = require '../volume'
-module.exports = class Pactl extends Volume
+module.exports = class Pacmd extends Volume
 
 	get: (cb) ->
 		args = ['list-sinks']
@@ -37,13 +37,4 @@ module.exports = class Pactl extends Volume
 		cmd.on 'exit', cb
 
 	toggle_mute: (cb) ->
-		args = ['set-sink-mute', @config.pacmd.sink, 'toggle']
-		cmd = ChildProcess.spawn 'pactl', args
-		if @config.debug
-			cmd.stdout.on 'data', (data) -> console.log "[pactl #{args}]\nSTDOUT: #{data}"
-			cmd.stderr.on 'data', (data) -> console.log "[pactl #{args}]\nSTDERR: #{data}"
-		cmd.on 'exit', cb
-
-  # CURVOL=$(pacmd list-sinks|grep -A 15 '* index'| awk '/volume: /{ print $3 }' | grep -m 1 % |sed 's/[%|,]//g') ||
-    # CURVOL=$(pacmd list-sinks|grep -A 15 '* index'| awk '/volume: front/{ print $5 }' | sed 's/[%|,]//g')
-
+		@_exec 'pactl', ['set-sink-mute', @config.pacmd.sink, 'toggle']

@@ -1,0 +1,26 @@
+# vim: ft=conf
+
+#Raise Volume
+"volbriosd volume inc"
+    m:0x0 + c:123
+    XF86AudioRaiseVolume 
+
+#Volume down
+"volbriosd volume dec"
+    m:0x0 + c:122
+    XF86AudioLowerVolume 
+
+#Mute Volume
+"volbriosd volume toggle_mute"
+    m:0x0 + c:121
+    XF86AudioMute 
+
+#Brightness up
+"volbriosd brightness inc"
+    m:0x40 + c:110
+    Mod4 + Home 
+
+#Brightness down
+"volbriosd brightness dec"
+    m:0x40 + c:115
+    Mod4 + End 

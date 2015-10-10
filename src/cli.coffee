@@ -22,6 +22,7 @@ CONFIG =
 		brightness: "display-brightness-symbolic"
 	pacmd:
 		sink: 0
+
 for path in [
 	"/etc/volbriosd/config.json",
 	"#{process.env.HOME}/.config/volbriosd/config.json"
@@ -36,29 +37,19 @@ for backend_type in ['volume', 'brightness', 'notify']
 	backend_class = require "../lib/#{backend_type}/#{CONFIG[backend_type].backend}"
 	backends[backend_type] = new backend_class(CONFIG)
 
-api =
-	brightness:
-		get: ->
-			backends.brightness.get (err, perc) ->
-				backends.notify.notify_brightness perc
-		up: ->
-			backends.brightness.inc CONFIG.brightness.step, @get
-		down: ->
-			backends.brightness.dec CONFIG.brightness.step, @get
-	volume:
-		get: ->
-			backends.volume.get (err, perc, muted) ->
-				backends.notify.notify_volume perc, muted
-		up: ->
-			backends.volume.inc CONFIG.volume.step, @get
-		down: ->
-			backends.volume.dec CONFIG.volume.step, @get
-		toggle_mute: ->
-			backends.volume.toggle_mute @get
-
 backend = process.argv[2]
 cmd = process.argv[3]
+val = if process.argv[4] then process.argv[4] else CONFIG[backend].step
 
-api[backend][cmd]()
+backend_get = ->
+	backends[backend].get (err, perc) ->
+		backends.notify[backend] perc
+switch cmd
+	when 'get'
+		backend_get()
+	when 'inc', 'dec', 'set'
+		backends[backend][cmd] val, backend_get
+	else
+		backends[backend][cmd] backend_get
 
 # volume.inc 10, (err) ->

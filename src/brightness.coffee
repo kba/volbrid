@@ -1,4 +1,5 @@
-module.exports = class Brightness
+CmdExecutor = require './cmd_executor'
+module.exports = class Brightness extends CmdExecutor
 
 	constructor: (@config) ->
 
