@@ -42,8 +42,8 @@ cmd = process.argv[3]
 val = if process.argv[4] then process.argv[4] else CONFIG[backend].step
 
 backend_get = ->
-	backends[backend].get (err, perc) ->
-		backends.notify[backend] perc
+	backends[backend].get (err, perc, muted) ->
+		backends.notify[backend] perc, muted
 switch cmd
 	when 'get'
 		backend_get()

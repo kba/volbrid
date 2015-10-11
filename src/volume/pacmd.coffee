@@ -37,4 +37,4 @@ module.exports = class Pacmd extends Volume
 		cmd.on 'exit', cb
 
 	toggle_mute: (cb) ->
-		@_exec 'pactl', ['set-sink-mute', @config.pacmd.sink, 'toggle']
+		@_exec 'pactl', ['set-sink-mute', @config.pacmd.sink, 'toggle'], cb
