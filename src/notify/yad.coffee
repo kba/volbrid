@@ -17,7 +17,7 @@ module.exports = class Yad extends Notify
 				when 'progress'
 					args.push "--progress"
 					args.push "--progress-text=Volume #{perc}%"
-					args.push "--percentage=#{perc}"
+					args.push "--percentage=#{perc / @config.volume.max * 100}"
 				when 'ascii'
 					args.push "--text=<big><tt>VOLUME: #{perc}%\n#{@_create_ascii_bar(perc, @config.volume.max)}</tt></big>"
 				when 'value'

@@ -3,7 +3,7 @@ module.exports = class VolnotiShow extends Notify
 
 	volume: (perc, muted, cb) ->
 		args = [
-			"#{perc}"
+			"#{perc / @config.volume.max * 100}"
 		]
 		if muted
 			args.push "-m"
