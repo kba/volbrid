@@ -23,5 +23,7 @@
   "bugs": {
     "url": "https://github.com/kba/volbriosd/issues"
   },
-  "dependencies": {}
+  "dependencies": {
+    "which": "^1.2.0"
+  }
 }

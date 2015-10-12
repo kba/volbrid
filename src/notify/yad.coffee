@@ -1,6 +1,8 @@
 Notify = require '../notify'
 module.exports = class Yad extends Notify
 
+	_commands: ['yad']
+
 	volume: (perc, muted, cb) ->
 		args = [
 			"--on-top"

@@ -1,6 +1,8 @@
 Notify = require '../notify'
 module.exports = class NotifySend extends Notify
 
+	_commands: ['notify-send']
+
 	volume: (perc, muted, cb) ->
 		args = [
 			"--icon=#{@_icon_for_volume(perc, muted)}"

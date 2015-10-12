@@ -1,6 +1,8 @@
 Notify = require '../notify'
 module.exports = class VolnotiShow extends Notify
 
+	_commands: ['volnoti_show']
+
 	volume: (perc, muted, cb) ->
 		args = [
 			"#{perc / @config.volume.max * 100}"

@@ -2,6 +2,8 @@ ChildProcess = require 'child_process'
 Volume = require '../volume'
 module.exports = class Pacmd extends Volume
 
+	_commands: ['pactl', 'pacmd']
+
 	get: (cb) ->
 		args = ['list-sinks']
 		cmd = ChildProcess.spawn 'pacmd', args
