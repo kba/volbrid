@@ -1,5 +1,5 @@
 {
-  "name": "volbriosd",
+  "name": "volbrid",
   "version": "0.1.6",
   "description": "volume and brightness control",
   "main": "lib/index.js",
@@ -11,17 +11,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kba/volbriosd"
+    "url": "https://github.com/kba/volbrid"
   },
   "author": "kba",
   "license": "MIT",
   "preferGlobal": true,
   "bin": {
-    "volbriosd": "bin/volbriosd.js"
+    "volbri": "bin/volbri",
+    "volbrid": "bin/volbrid.js"
   },
-  "man": "man/volbriosd.1.gz",
+  "man": "man/volbrid.1.gz",
   "bugs": {
-    "url": "https://github.com/kba/volbriosd/issues"
+    "url": "https://github.com/kba/volbrid/issues"
   },
   "dependencies": {
     "cson": "^3.0.2",
