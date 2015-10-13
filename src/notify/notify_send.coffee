@@ -1,39 +1,27 @@
 Notify = require '../notify'
 module.exports = class NotifySend extends Notify
 
-	volume: (perc, muted, cb) ->
+	_commands: ['notify-send']
+
+	notify: (backend, perc, disabled, text, cb) ->
 		args = [
-			"--icon=#{@_icon_for_volume(perc, muted)}"
+			"--icon=#{@_icon(backend, perc, disabled)}"
 			"--expire-time=#{@config.notify.timeout}"
-			"--hint=string:synchronous:volume"
+			"--hint=string:synchronous:#{backend}"
 		]
 		switch @config.notify.style
 			when 'ascii'
-				args.push "VOLUME: #{perc}"
-				args.push "<big><tt>#{@_create_ascii_bar(perc, @config.volume.max)}</tt></big>"
+				args.push "#{backend}: #{perc}"
+				if text
+					args.push text
+				else
+					args.push "<big><tt>#{@_ascii_bar(perc, backend)}</tt></big>"
 			when 'value'
-				args.push "VOLUME #{perc}"
+				args.push "#{backend} #{perc}"
 			when 'progress'
-				args.push "--hint=int:value:#{perc * 100 / @config.volume.max}"
-				args.push "--hint=string:synchronous:volume"
-				args.push "VOLUME #{perc}"
+				args.push "--hint=int:value:#{@_relative_percent(perc, backend)}"
+				if text
+					args.push text
+				else
+					args.push "#{backend}: #{perc}"
 		@_exec 'notify-send', args, cb
-
-
-	brightness: (perc, muted, cb) ->
-		args = [
-			"--icon=#{@config.icons.brightness}"
-			"--expire-time=#{@config.notify.timeout}"
-		]
-		switch @config.notify.style
-			when 'ascii'
-				args.push "BRIGHTNESS: #{perc}"
-				args.push "<tt>#{@_create_ascii_bar(perc, @config.brightness.max)}</tt>"
-			when 'value'
-				args.push "<big><tt>BRIGHTNESS: #{perc}</tt></big>"
-			when 'progress'
-				args.push "--hint=int:value:#{perc}"
-				args.push "--hint=string:synchronous:brightness"
-				args.push " "
-		@_exec 'notify-send', args, cb
-

@@ -1,7 +1,10 @@
 Notify = require '../notify'
+YAD = 'yad'
 module.exports = class Yad extends Notify
 
-	volume: (perc, muted, cb) ->
+	_commands: [YAD]
+
+	notify: (backend, perc, disabled, text, cb) ->
 		args = [
 			"--on-top"
 			"--no-buttons"
@@ -9,38 +12,19 @@ module.exports = class Yad extends Notify
 			"--skip-taskbar"
 			"--undecorated"
 			"--sticky"
-			"--image=#{@_icon_for_volume(perc, muted)}"
-			"--timeout=#{Math.ceil(@config.notify.timeout / 1000)}"
+			"--image=#{@_icon(backend, perc, disabled)}"
+			"--timeout=#{@_timeout_in_seconds()}"
 		]
-		unless muted
+		unless disabled
 			switch @config.notify.style
 				when 'progress'
 					args.push "--progress"
-					args.push "--progress-text=Volume #{perc}%"
-					args.push "--percentage=#{perc}"
+					args.push "--progress-text=#{backend} #{perc}%"
+					args.push "--percentage=#{@_relative_percent(perc, backend)}"
 				when 'ascii'
-					args.push "--text=<big><tt>VOLUME: #{perc}%\n#{@_create_ascii_bar(perc, @config.volume.max)}</tt></big>"
+					args.push "--text=<big><tt>#{backend}: #{perc}%\n#{@_ascii_bar perc, backend}</tt></big>"
 				when 'value'
-					args.push "--text=<big><tt>VOLUME: #{perc}%</tt></big>"
-		@_exec 'yad', args, cb
-
-	brightness: (perc, muted, cb) ->
-		args = [
-			"--on-top"
-			"--no-buttons"
-			"--center"
-			"--skip-taskbar"
-			"--undecorated"
-			"--sticky"
-			"--image=#{@config.icons.brightness}"
-			"--timeout=#{Math.ceil(@config.notify.timeout / 1000)}"
-		]
-		switch @config.notify.style
-			when 'progress'
-				args.push "--progress"
-				args.push "--percentage=#{perc}"
-			when 'ascii'
-				args.push "--text=<big><tt>BRIGHTNESS: #{parseInt(perc)}%\n#{@_create_ascii_bar(perc, @config.brightness.max)}</tt></big>"
-			when 'value'
-				args.push "--text=<big><tt>BRIGHTNESS: #{perc}%</tt></big>"
-		@_exec 'yad', args, cb
+					args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>"
+		if text
+			args.push "--text=#{text}"
+		@_exec YAD, args, cb, null, true
