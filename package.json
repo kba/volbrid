@@ -1,6 +1,6 @@
 {
   "name": "volbriosd",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "volume and brightness control",
   "main": "lib/index.js",
   "scripts": {
