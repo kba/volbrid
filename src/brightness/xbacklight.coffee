@@ -1,16 +1,13 @@
-ChildProcess = require 'child_process'
-Brightness = require '../brightness'
-module.exports = class Xbacklight extends Brightness
+Backend = require '../backend'
+
+XBACKLIGHT = 'xbacklight'
+module.exports = class Xbacklight extends Backend
+
+	_commands: [XBACKLIGHT]
 
 	get: (cb) ->
-		args = ['-get']
-		cmd = ChildProcess.spawn 'xbacklight', args
-		cmd.stdout.on 'data', (data) ->
+		@_exec XBACKLIGHT, ['-get'], null, (data) ->
 			cb null, parseInt(data)
-		if @config.debug
-			cmd.stdout.on 'data', (data) -> console.log "[xbacklight #{args}]\nSTDOUT: #{data}"
-			cmd.stderr.on 'data', (data) -> console.log "[xbacklight #{args}]\nSTDERR: #{data}"
-		cmd.on 'error', (err) -> console.log cb err
-	inc: (perc, cb) -> @_exec 'xbacklight', ['-inc', "#{perc}"], cb
-	dec: (perc, cb) -> @_exec 'xbacklight', ['-dec', "#{perc}"], cb
-	set: (perc, cb) -> @_exec 'xbacklight', ['-set', "#{perc}"], cb
+	inc: (perc, cb) -> @_exec XBACKLIGHT, ['-inc', "#{perc}"], cb
+	dec: (perc, cb) -> @_exec XBACKLIGHT, ['-dec', "#{perc}"], cb
+	set: (perc, cb) -> @_exec XBACKLIGHT, ['-set', "#{perc}"], cb

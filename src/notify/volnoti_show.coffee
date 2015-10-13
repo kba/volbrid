@@ -1,19 +1,15 @@
 Notify = require '../notify'
+
+CMD = 'volnoti-show'
 module.exports = class VolnotiShow extends Notify
 
-	_commands: ['volnoti_show']
+	_commands: [CMD]
 
-	volume: (perc, muted, cb) ->
+	notify: (backend, perc, disabled, text, cb) ->
 		args = [
-			"#{perc / @config.volume.max * 100}"
+			"-T", backend
+			@_relative_percent(perc, backend)
 		]
-		if muted
+		if disabled
 			args.push "-m"
-		@_exec 'volnoti-show', args, cb
-
-	brightness: (perc, cb) ->
-		args = [
-			"-T",  "brightness"
-			"#{perc / @config.brightness.max * 100}"
-		]
-		@_exec 'volnoti-show', args, cb
+		@_exec CMD, args, cb

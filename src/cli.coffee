@@ -1,55 +1,78 @@
 Fs = require 'fs'
-DeepMerge = require './deepmerge'
-CONFIG =
-	volume:
-		backend: "pacmd"
-		step: 10
-		max: 250
-	brightness:
-		backend: "xbacklight"
-		step: 10
-		max: 100
-	notify:
-		backend: "notify_send"  # notify_send, yad
-		timeout: 50  # in ms
-		style: 'ascii'  # ascii, progress, value
-		fillchar: '0'
-	icons:
-		mute: "audio-volume-muted"
-		volume_low: "audio-volume-low"
-		volume_medium: "audio-volume-medium"
-		volume_high: "audio-volume-high"
-		brightness: "display-brightness-symbolic"
-	pacmd:
-		sink: 0
+CSON = require 'cson'
+Extend = require 'node.extend'
+{UNKNOWN_COMMAND, UNKNOWN_BACKEND} = require './errors'
+CONFIG = {}
 
-for path in [
-	"/etc/volbriosd/config.json",
-	"#{process.env.HOME}/.config/volbriosd/config.json"
-	"#{process.cwd()}/volbriosd.json"
-	]
-	if Fs.existsSync path
-		localConfig = JSON.parse(Fs.readFileSync(path))
-		CONFIG = DeepMerge(CONFIG, localConfig)
+load_config = (args) ->
+	for path in [
+		"#{__dirname}/../default-config.cson"
+		"/etc/volbriosd.cson",
+		"#{process.env.HOME}/.config/volbriosd.cson"
+		"#{process.cwd()}/volbriosd.cson"
+		]
+		if Fs.existsSync path
+			CONFIG = Extend(true, CONFIG, CSON.load(path))
+		for k,v of CONFIG.providers
+			continue if k is '_default'
+			_defaultClone = Extend true, {}, CONFIG.providers._default
+			CONFIG.providers[k] = Extend(true, _defaultClone, v)
 
-backends = {}
-for backend_type in ['volume', 'brightness', 'notify']
-	backend_class = require "../lib/#{backend_type}/#{CONFIG[backend_type].backend}"
-	backends[backend_type] = new backend_class(CONFIG)
+get_backend = (type) ->
+	backend_config = if type is 'notify' then CONFIG.notify else CONFIG.providers[type]
+	if backend_config.backend
+		mod = require("./#{type}/#{backend_config.backend}")
+		return new mod(CONFIG)
+	e = "No backend defined for '#{type}'"
+	for modName in backend_config.order
+		try
+			mod = require("./#{type}/#{modName}")
+			return new mod(CONFIG)
+		catch innerE
+			e = innerE
+			continue
+	throw e
 
-backend = process.argv[2]
-cmd = process.argv[3]
-val = if process.argv[4] then process.argv[4] else CONFIG[backend].step
+list_backends = (backend_type) ->
+	ret = []
+	for k,v of CONFIG.providers
+		if typeof v is 'object' and k isnt '_default'
+			ret.push k
+	return ret
 
-backend_get = ->
-	backends[backend].get (err, perc, muted) ->
-		backends.notify[backend] perc, muted
-switch cmd
-	when 'get'
-		backend_get()
-	when 'inc', 'dec', 'set'
-		backends[backend][cmd] val, backend_get
-	else
-		backends[backend][cmd] backend_get
+get_all_backends = ->
+	backends = {}
+	for backend in list_backends()
+		backends[backend] = get_backend backend
+	backends.notify = get_backend 'notify'
+	return backends
+
+call_backend = (backend, cmd, val) ->
+	if not CONFIG.providers[backend]
+		UNKNOWN_BACKEND backend, list_backends()
+	val or= CONFIG.providers[backend].step
+	backends = get_all_backends()
+	show = ->
+		backends[backend].get (err, perc, disabled, text) ->
+			backends.notify.notify backend, perc, disabled, text
+	switch cmd
+		when 'show', 'get'
+			show()
+		when 'inc', 'up'
+			backends[backend].inc val, show
+		when 'dec', 'down'
+			backends[backend].dec val, show
+		when 'set'
+			backends[backend].set val, show
+		when 'toggle'
+			backends[backend].set val, show
+		else
+			UNKNOWN_COMMAND cmd, backend
+
+load_config(process.argv)
+call_backend process.argv[2], process.argv[3], process.argv[4]
+
+# TODO argparse
+# TODO daemonize
 
 # volume.inc 10, (err) ->

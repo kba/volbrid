@@ -24,6 +24,10 @@
     "url": "https://github.com/kba/volbriosd/issues"
   },
   "dependencies": {
+    "cson": "^3.0.2",
+    "daemon": "^1.1.0",
+    "deepmerge": "^0.2.10",
+    "node.extend": "^1.1.5",
     "which": "^1.2.0"
   }
 }

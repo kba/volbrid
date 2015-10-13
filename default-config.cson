@@ -1,0 +1,77 @@
+# vim: ft=coffee
+providers:
+
+	_default:
+		# Step to increase/decrease in percent
+		step: 10
+		# Maximum in percent
+		max: 100
+		# Value to consider equivalent with 'off'
+		off_value: 0
+		# Thresholds at which to change icons from 
+		# 0: low -> medium
+		# 1: medium -> high
+		thresholds: [33, 66]
+		icons:
+			off: 'application-exit'
+			low: 'application-exit'
+			medium: 'application-exit'
+			high: 'application-exit'
+
+	volume:
+		# Maximum volume in percent
+		max: 250
+		# Order of preference for the volume backends
+		order: [
+			'pulseaudio'
+		]
+		# Configuration of the pulseaudio backend
+		pulseaudio:
+			sink: 0
+		# Icons for the volume states
+		icons:
+			off: "audio-volume-muted"
+			low: "audio-volume-low"
+			medium: "audio-volume-medium"
+			high: "audio-volume-high"
+
+	brightness:
+		# Order of preference for the brightness backends
+		order: [
+			'xbacklight'
+		]
+		# Icons for the brightness states
+		icons:
+			off: "display-brightness-symbolic"
+			low: "display-brightness-symbolic"
+			medium: "display-brightness-symbolic"
+			high: "display-brightness-symbolic"
+
+	battery:
+		order: [
+			'acpi'
+		]
+		off_value: 100
+		icons:
+			off: "battery-caution-charging-symbolic"
+			low: "battery-caution-symbolic"
+			medium: "battery-low-symbolic"
+			high: "battery-good-symbolic"
+
+
+notify:
+	# timeout in ms
+	timeout: 50
+	# ascii: Show an ascii progressbar, e.g. [0000000---] for 70%
+	# progress: Hint the backend to show a graphical progress bar
+	# value: Just show the value
+	style: 'ascii'
+	# char for filled steps in 'ascii' style
+	fillchar: '0'
+	# char for filled steps in 'ascii' style
+	emptychar: '-'
+	order: [
+		'yad'
+		'notify_send'
+		'volnoti_show'
+	]
