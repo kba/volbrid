@@ -16,17 +16,17 @@ module.exports = class PulseAudio extends Backend
 			cb null, parseInt(vol_left), muted
 
 	inc: (perc, cb) ->
-		args = ['set-sink-volume', @config.volume.pulseaudio.sink, "+#{perc}%"]
+		args = ['set-sink-volume', @config.providers.volume.pulseaudio.sink, "+#{perc}%"]
 		@_exec PACTL, args, cb
 
 	dec: (perc, cb) ->
-		args = ['set-sink-volume', @config.volume.pulseaudio.sink, "-#{perc}%"]
+		args = ['set-sink-volume', @config.providers.volume.pulseaudio.sink, "--", "-#{perc}%"]
 		@_exec PACTL, args, cb
 
 	set: (perc, cb) ->
-		args = ['set-sink-volume', @config.volume.pulseaudio.sink, "#{perc}%"]
+		args = ['set-sink-volume', @config.providers.volume.pulseaudio.sink, "#{perc}%"]
 		@_exec PACTL, args, cb
 
 	toggle: (cb) ->
-		args = ['set-sink-mute', @config.volume.pulseaudio.sink, 'toggle']
+		args = ['set-sink-mute', @config.providers.volume.pulseaudio.sink, 'toggle']
 		@_exec PACTL, args, cb

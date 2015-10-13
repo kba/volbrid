@@ -20,7 +20,6 @@ module.exports = class NotifySend extends Notify
 				args.push "#{backend} #{perc}"
 			when 'progress'
 				args.push "--hint=int:value:#{@_relative_percent(perc, backend)}"
-				args.push "--hint=string:synchronous:#{backend}"
 				if text
 					args.push text
 				else

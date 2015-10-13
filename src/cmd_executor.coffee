@@ -20,7 +20,7 @@ module.exports = class CmdExecutor
 		return "[#{bar}]"
 
 	_relative_percent: (perc, backend) ->
-		return perc * 100 / @config.providers[backend].max
+		return Math.min(100, perc * (100 / @config.providers[backend].max))
 
 	_exec: (cmd_name, args, cb, data_cb, pkill) ->
 		self = @

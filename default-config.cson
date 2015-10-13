@@ -20,8 +20,7 @@ providers:
 
 	volume:
 		# Maximum volume in percent
-		max: 250
-		# Order of preference for the volume backends
+		max: 250 # Order of preference for the volume backends
 		order: [
 			'pulseaudio'
 		]
