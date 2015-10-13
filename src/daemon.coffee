@@ -4,14 +4,14 @@ Extend = require 'node.extend'
 Net = require 'net'
 {UNKNOWN_COMMAND, UNKNOWN_BACKEND} = require './errors'
 CONFIG = {}
-SOCKET_PATH = '/tmp/volbriosd.sock'
+SOCKET_PATH = '/tmp/volbrid.sock'
 
 load_config = (args) ->
 	for path in [
 		"#{__dirname}/../default-config.cson"
-		"/etc/volbriosd.cson",
-		"#{process.env.HOME}/.config/volbriosd.cson"
-		"#{process.cwd()}/volbriosd.cson"
+		"/etc/volbrid.cson",
+		"#{process.env.HOME}/.config/volbrid.cson"
+		"#{process.cwd()}/volbrid.cson"
 		]
 		if Fs.existsSync path
 			console.log "Merging config from #{path}"
@@ -85,6 +85,8 @@ start_server = (retry) ->
 				when 'reload'
 					load_config(args[1..])
 					sock.write 'Reloaded config'
+				when 'debug'
+					sock.write CSON.stringify CONFIG
 				when 'quit'
 					stop_server()
 					exit()

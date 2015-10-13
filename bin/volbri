@@ -1,2 +1,0 @@
-#!/bin/bash
-echo $@|socat - UNIX-CONNECT:/tmp/volbriosd.sock

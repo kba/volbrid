@@ -17,7 +17,7 @@
   "license": "MIT",
   "preferGlobal": true,
   "bin": {
-    "volbri": "bin/volbri",
+    "volbri": "bin/volbri.sh",
     "volbrid": "bin/volbrid.js"
   },
   "man": "man/volbrid.1.gz",
