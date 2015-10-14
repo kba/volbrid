@@ -20,7 +20,10 @@
     "volbri": "bin/volbri.sh",
     "volbrid": "bin/volbrid.js"
   },
-  "man": "man/volbrid.1.gz",
+  "man": [
+      "man/volbrid.1.gz",
+      "man/volbri.1.gz"
+  ],
   "bugs": {
     "url": "https://github.com/kba/volbrid/issues"
   },
