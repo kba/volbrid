@@ -1,5 +1,6 @@
 Fs       = require 'fs'
 YAML     = require 'js-yaml'
+Chokidar = require 'chokidar'
 Extend   = require 'node.extend'
 Net      = require 'net'
 
@@ -8,12 +9,29 @@ Net      = require 'net'
 CONFIG = {}
 SOCKET_PATH = '/tmp/volbrid.sock'
 
+XDG_CONFIG_HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yaml"
 CONFIG_FILES = [
 	"#{__dirname}/../default-config.yaml"
-	"/etc/volbrid.yaml",
-	"#{process.env.HOME}/.config/volbrid.yaml"
+	"/etc/volbrid.yaml"
+	XDG_CONFIG_HOME_CONFIG
 	"#{process.cwd()}/volbrid.yaml"
 ]
+
+WATCHER = null
+
+watch_config_files = () ->
+	WATCHER = Chokidar.watch XDG_CONFIG_HOME_CONFIG, {
+		persistent: false
+	}
+	console.log "Watching file #{XDG_CONFIG_HOME_CONFIG}"
+	WATCHER.on 'change', (path) ->
+		console.log "Config file #{path} changed. Reloading config"
+		load_config()
+
+unwatch_config_files = () ->
+	console.log "Unwatching file #{XDG_CONFIG_HOME_CONFIG}"
+	WATCHER.unwatch XDG_CONFIG_HOME_CONFIG
+	WATCHER.close()
 
 load_config = (args) ->
 	for path in CONFIG_FILES
@@ -77,7 +95,7 @@ call_backend = (backend, cmd, val) ->
 			UNKNOWN_COMMAND cmd, backend
 
 load_config(process.argv)
-# call_backend process.argv[2], process.argv[3], process.argv[4]
+watch_config_files()
 
 start_server = (retry) ->
 	server = Net.createServer (sock) ->
@@ -109,6 +127,7 @@ start_server = (retry) ->
 			start_server(true)
 
 stop_server = ->
+	unwatch_config_files()
 	console.log 'Remove socket'
 	Fs.unlinkSync(SOCKET_PATH)
 
