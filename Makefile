@@ -13,7 +13,8 @@ clean:
 
 docs:
 	mkdir -p man
-	$(PANDOC) -s -t man dist/volbriosd.1.md |gzip > man/volbriosd.1.gz
+	$(PANDOC) -s -t man dist/volbrid.1.md |gzip > man/volbrid.1.gz
+	$(PANDOC) -s -t man dist/volbri.1.md |gzip > man/volbri.1.gz
 
 build: docs
 	coffee -c -o lib src

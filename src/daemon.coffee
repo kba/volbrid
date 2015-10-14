@@ -1,21 +1,43 @@
-Fs = require 'fs'
-CSON = require 'cson'
-Extend = require 'node.extend'
-Net = require 'net'
+Fs       = require 'fs'
+YAML     = require 'js-yaml'
+Chokidar = require 'chokidar'
+Extend   = require 'node.extend'
+Net      = require 'net'
+
 {UNKNOWN_COMMAND, UNKNOWN_BACKEND} = require './errors'
+
 CONFIG = {}
 SOCKET_PATH = '/tmp/volbrid.sock'
 
+XDG_CONFIG_HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yaml"
+CONFIG_FILES = [
+	"#{__dirname}/../default-config.yaml"
+	"/etc/volbrid.yaml"
+	XDG_CONFIG_HOME_CONFIG
+	"#{process.cwd()}/volbrid.yaml"
+]
+
+WATCHER = null
+
+watch_config_files = () ->
+	WATCHER = Chokidar.watch XDG_CONFIG_HOME_CONFIG, {
+		persistent: false
+	}
+	console.log "Watching file #{XDG_CONFIG_HOME_CONFIG}"
+	WATCHER.on 'change', (path) ->
+		console.log "Config file #{path} changed. Reloading config"
+		load_config()
+
+unwatch_config_files = () ->
+	console.log "Unwatching file #{XDG_CONFIG_HOME_CONFIG}"
+	WATCHER.unwatch XDG_CONFIG_HOME_CONFIG
+	WATCHER.close()
+
 load_config = (args) ->
-	for path in [
-		"#{__dirname}/../default-config.cson"
-		"/etc/volbrid.cson",
-		"#{process.env.HOME}/.config/volbrid.cson"
-		"#{process.cwd()}/volbrid.cson"
-		]
+	for path in CONFIG_FILES
 		if Fs.existsSync path
 			console.log "Merging config from #{path}"
-			CONFIG = Extend(true, CONFIG, CSON.load(path))
+			CONFIG = Extend(true, CONFIG, YAML.safeLoad(Fs.readFileSync(path, 'utf-8')))
 		for k,v of CONFIG.providers
 			continue if k is '_default'
 			_defaultClone = Extend true, {}, CONFIG.providers._default
@@ -73,7 +95,7 @@ call_backend = (backend, cmd, val) ->
 			UNKNOWN_COMMAND cmd, backend
 
 load_config(process.argv)
-# call_backend process.argv[2], process.argv[3], process.argv[4]
+watch_config_files()
 
 start_server = (retry) ->
 	server = Net.createServer (sock) ->
@@ -86,7 +108,7 @@ start_server = (retry) ->
 					load_config(args[1..])
 					sock.write 'Reloaded config'
 				when 'debug'
-					sock.write CSON.stringify CONFIG
+					sock.write YAML.dump CONFIG
 				when 'quit'
 					stop_server()
 					exit()
@@ -105,6 +127,7 @@ start_server = (retry) ->
 			start_server(true)
 
 stop_server = ->
+	unwatch_config_files()
 	console.log 'Remove socket'
 	Fs.unlinkSync(SOCKET_PATH)
 

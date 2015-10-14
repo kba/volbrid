@@ -1,6 +1,6 @@
 {
   "name": "volbrid",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "volume and brightness control",
   "main": "lib/index.js",
   "scripts": {
@@ -28,9 +28,10 @@
     "url": "https://github.com/kba/volbrid/issues"
   },
   "dependencies": {
-    "cson": "^3.0.2",
+    "chokidar": "^1.2.0",
     "daemon": "^1.1.0",
     "deepmerge": "^0.2.10",
+    "js-yaml": "^3.4.3",
     "node.extend": "^1.1.5",
     "which": "^1.2.0"
   }
