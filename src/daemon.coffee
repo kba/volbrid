@@ -1,21 +1,25 @@
-Fs = require 'fs'
-CSON = require 'cson'
-Extend = require 'node.extend'
-Net = require 'net'
+Fs       = require 'fs'
+YAML     = require 'js-yaml'
+Extend   = require 'node.extend'
+Net      = require 'net'
+
 {UNKNOWN_COMMAND, UNKNOWN_BACKEND} = require './errors'
+
 CONFIG = {}
 SOCKET_PATH = '/tmp/volbrid.sock'
 
+CONFIG_FILES = [
+	"#{__dirname}/../default-config.yaml"
+	"/etc/volbrid.yaml",
+	"#{process.env.HOME}/.config/volbrid.yaml"
+	"#{process.cwd()}/volbrid.yaml"
+]
+
 load_config = (args) ->
-	for path in [
-		"#{__dirname}/../default-config.cson"
-		"/etc/volbrid.cson",
-		"#{process.env.HOME}/.config/volbrid.cson"
-		"#{process.cwd()}/volbrid.cson"
-		]
+	for path in CONFIG_FILES
 		if Fs.existsSync path
 			console.log "Merging config from #{path}"
-			CONFIG = Extend(true, CONFIG, CSON.load(path))
+			CONFIG = Extend(true, CONFIG, YAML.safeLoad(Fs.readFileSync(path, 'utf-8')))
 		for k,v of CONFIG.providers
 			continue if k is '_default'
 			_defaultClone = Extend true, {}, CONFIG.providers._default
@@ -86,7 +90,7 @@ start_server = (retry) ->
 					load_config(args[1..])
 					sock.write 'Reloaded config'
 				when 'debug'
-					sock.write CSON.stringify CONFIG
+					sock.write YAML.dump CONFIG
 				when 'quit'
 					stop_server()
 					exit()
