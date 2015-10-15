@@ -21,8 +21,8 @@
     "volbrid": "bin/volbrid.js"
   },
   "man": [
-      "man/volbrid.1.gz",
-      "man/volbri.1.gz"
+    "man/volbrid.1.gz",
+    "man/volbri.1.gz"
   ],
   "bugs": {
     "url": "https://github.com/kba/volbrid/issues"
@@ -31,8 +31,9 @@
     "chokidar": "^1.2.0",
     "daemon": "^1.1.0",
     "deepmerge": "^0.2.10",
-    "js-yaml": "^3.4.3",
+    "mkdirp": "^0.5.1",
     "node.extend": "^1.1.5",
+    "pwuid": "^1.1.1",
     "which": "^1.2.0"
   }
 }

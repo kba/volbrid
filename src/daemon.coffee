@@ -1,22 +1,22 @@
-Fs       = require 'fs'
-YAML     = require 'js-yaml'
 Chokidar = require 'chokidar'
 Extend   = require 'node.extend'
+Fs       = require 'fs'
+MkdirP   = require 'mkdirp'
 Net      = require 'net'
-
+Pwuid   = require 'pwuid'
+YAML     = require 'yamljs'
 {UNKNOWN_COMMAND, UNKNOWN_BACKEND} = require './errors'
 
-CONFIG = {}
-SOCKET_PATH = '/tmp/volbrid.sock'
-
-XDG_CONFIG_HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yaml"
+USERNAME = Pwuid().name
+SOCKET_PATH = "/tmp/#{USERNAME}/volbrid.sock"
+XDG_CONFIG_HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yml"
 CONFIG_FILES = [
-	"#{__dirname}/../default-config.yaml"
-	"/etc/volbrid.yaml"
+	"#{__dirname}/../builtin.yml"
+	"/etc/volbrid.yml"
 	XDG_CONFIG_HOME_CONFIG
-	"#{process.cwd()}/volbrid.yaml"
 ]
 
+CONFIG = {}
 WATCHER = null
 
 watch_config_files = () ->
@@ -37,7 +37,7 @@ load_config = (args) ->
 	for path in CONFIG_FILES
 		if Fs.existsSync path
 			console.log "Merging config from #{path}"
-			CONFIG = Extend(true, CONFIG, YAML.safeLoad(Fs.readFileSync(path, 'utf-8')))
+			CONFIG = Extend(true, CONFIG, YAML.load(path))
 		for k,v of CONFIG.providers
 			continue if k is '_default'
 			_defaultClone = Extend true, {}, CONFIG.providers._default
@@ -46,6 +46,7 @@ load_config = (args) ->
 get_backend = (type) ->
 	backend_config = if type is 'notify' then CONFIG.notify else CONFIG.providers[type]
 	if backend_config.backend
+		console.log "Force load './#{type}/#{backend_config.backend}' because 'backend' overrides order"
 		mod = require("./#{type}/#{backend_config.backend}")
 		return new mod(CONFIG)
 	e = "No backend defined for '#{type}'"
@@ -56,7 +57,7 @@ get_backend = (type) ->
 		catch innerE
 			e = innerE
 			continue
-	throw e
+	console.log "Failed to load a backend for '#{type}': #{e}"
 
 list_backends = (backend_type) ->
 	ret = []
@@ -97,7 +98,7 @@ call_backend = (backend, cmd, val) ->
 load_config(process.argv)
 watch_config_files()
 
-start_server = (retry) ->
+start_server = (already_retried) ->
 	server = Net.createServer (sock) ->
 		sock.on 'data', (data) ->
 			str = data.toString().replace /\n/g, ''
@@ -108,7 +109,7 @@ start_server = (retry) ->
 					load_config(args[1..])
 					sock.write 'Reloaded config'
 				when 'debug'
-					sock.write YAML.dump CONFIG
+					sock.write YAML.stringify CONFIG
 				when 'quit'
 					stop_server()
 					exit()
@@ -117,14 +118,16 @@ start_server = (retry) ->
 						call_backend.apply(@, args)
 					catch e
 						sock.write e
-	server.listen SOCKET_PATH, () ->
-		console.log "Listening on #{SOCKET_PATH}"
 	server.on 'listening', ->
 		return Fs.chmod(SOCKET_PATH, 0o0777)
 	server.on 'error', ->
 		stop_server()
-		if not retry
+		if not already_retried
 			start_server(true)
+	MkdirP "/tmp/#{USERNAME}", (err) ->
+		throw "Could not create /tmp/#{USERNAME}" if err
+		server.listen SOCKET_PATH, () ->
+			console.log "Listening on #{SOCKET_PATH}"
 
 stop_server = ->
 	unwatch_config_files()
@@ -141,7 +144,3 @@ exit = ->
 	process.exit()
 
 start_server()
-# TODO argparse
-# TODO daemonize
-
-# volume.inc 10, (err) ->

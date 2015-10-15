@@ -1,7 +1,8 @@
 #!/bin/bash
-SOCK=/tmp/volbrid.sock
+user=$(whoami)
+SOCK=/tmp/$user/volbrid.sock
 if [[ ! -e $SOCK ]];then
-    echo "Start server with volbrid(1)"
+    echo "Server socket at $SOCK not found. Start server with volbrid(1)"
     exit 12
 fi
 echo $@|socat - "UNIX-CONNECT:$SOCK"
