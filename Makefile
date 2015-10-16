@@ -10,13 +10,18 @@ all: dist
 clean:
 	rm -rf lib
 	rm -rf man
+	rm -rf etc
 
 docs:
 	mkdir -p man
 	$(PANDOC) -s -t man dist/volbrid.1.md |gzip > man/volbrid.1.gz
 	$(PANDOC) -s -t man dist/volbri.1.md |gzip > man/volbri.1.gz
 
-build: docs
+etc:
+	mkdir -p etc
+	sed 's/^/# /' < dist/builtin.yml > etc/volbrid.yml
+
+build: docs etc
 	coffee -c -o lib src
 
 dist: build
@@ -25,6 +30,7 @@ dist: build
 		bin \
 		dist \
 		man \
+		etc \
 		lib \
 		Makefile \
 		.npmignore \
@@ -35,5 +41,10 @@ distclean: clean
 	rm -rf $(PKGNAME)-$(VERSION)
 	rm -f $(PKGNAME)-$(VERSION).tar.gz
 
-install:
-	npm install --unsafe-perm --prefix=$(DESTDIR)/$(PREFIX) -g
+install: build
+	npm install --unsafe-perm --prefix=$(DESTDIR)/$(PREFIX) --global
+	mkdir -p $(DESTDIR)/etc
+	cp -t $(DESTDIR)/etc etc/volbrid.yml
+	# find $(DESTDIR/$(PREFIX) -name "package.json" -exec sed -i "s,$(PWD),," {} \;
+	# find $(DESTDIR/$(PREFIX) -name "package.json" -exec sed -i "s,$(PWD),," {} \;
+

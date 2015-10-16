@@ -26,7 +26,7 @@ module.exports = class CmdExecutor
 		self = @
 		cmd_cb = (err) ->
 			if self.config.debug >= 1
-				console.log "Execute #{cmd_name + ' ' + args.join(' ')}"
+				console.log "$ #{cmd_name + ' ' + args.join(' ')}"
 			cmd = ChildProcess.spawn cmd_name, args
 			if data_cb
 				cmd.stdout.on 'data', data_cb
