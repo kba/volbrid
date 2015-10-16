@@ -7,38 +7,38 @@ Pwuid    = require 'pwuid'
 YAML     = require 'yamljs'
 {UNKNOWN_COMMAND, UNKNOWN_BACKEND} = require './errors'
 
-XDG_CONFIG_HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yml"
-CONFIG_FILES = [
-	"#{__dirname}/../builtin.yml"
-	"/etc/volbrid.yml"
-	XDG_CONFIG_HOME_CONFIG
-]
+BUILTIN_CONFIG = "#{__dirname}/../dist/builtin.yml"
+ETC_CONFIG = "/etc/volbrid.yml"
+HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yml"
 
 module.exports = class Daemon
 
 	constructor: (@options) ->
 		@username = Pwuid().name
 		@socket_path = "/tmp/#{@username}/volbrid.sock"
+		@notify = null
+		@providers = {}
+		@config = {}
 		@reload_config()
 		@watch_config_files()
 
 	watch_config_files : () ->
-		console.log "Watching file #{XDG_CONFIG_HOME_CONFIG}"
-		@watcher = Chokidar.watch XDG_CONFIG_HOME_CONFIG, {
+		console.log "Watching file #{HOME_CONFIG}"
+		@watcher = Chokidar.watch HOME_CONFIG, {
 			persistent: false
 		}
-		@watcher.on 'change', (path) ->
+		@watcher.on 'change', (path) =>
 			console.log "Config file #{path} changed. Reloading config"
-			reload_config()
+			@reload_config()
 
 	unwatch_config_files: () ->
-		console.log "Unwatching file #{XDG_CONFIG_HOME_CONFIG}"
-		@watcher.unwatch XDG_CONFIG_HOME_CONFIG
+		console.log "Unwatching file #{HOME_CONFIG}"
+		@watcher.unwatch HOME_CONFIG
 		@watcher.close()
 
 	reload_config: (args) ->
-		@config = {}
-		for path in CONFIG_FILES
+		@config = YAML.load(BUILTIN_CONFIG)
+		for path in [ETC_CONFIG, HOME_CONFIG]
 			if Fs.existsSync path
 				console.log "Merging config from #{path}"
 				@config = Extend(true, @config, YAML.load(path))
@@ -46,56 +46,56 @@ module.exports = class Daemon
 				continue if k is '_default'
 				_defaultClone = Extend true, {}, @config.providers._default
 				@config.providers[k] = Extend(true, _defaultClone, v)
+		for backend in @list_providers()
+			@providers[backend] = @load_executor backend
+		@notify = @load_executor 'notify'
 
-	get_backend: (type) ->
+	load_executor: (type) ->
 		backend_config = if type is 'notify' then @config.notify else @config.providers[type]
 		if backend_config.backend
-			console.log "Force load './#{type}/#{backend_config.backend}' because 'backend' overrides order"
-			mod = require("./#{type}/#{backend_config.backend}")
+			modPath = "./#{type}/#{backend_config.backend}"
+			mod = require(modPath)
+			console.log "Loaded #{modPath}"
 			return new mod(@config)
-		e = "No backend defined for '#{type}'"
+		e = null
 		for modName in backend_config.order
 			try
-				mod = require("./#{type}/#{modName}")
+				modPath = "./#{type}/#{modName}"
+				mod = require(modPath)
+				console.log "Loaded #{modPath}"
 				return new mod(@config)
 			catch innerE
+				console.log "Could not load #{type}/#{modName}"
 				e = innerE
 				continue
 		console.log "Failed to load a backend for '#{type}': #{e}"
 
-	list_backends: (backend_type) ->
+	list_providers: () ->
 		ret = []
-		for k,v of @config.providers
+		for k, v of @config.providers
 			if typeof v is 'object' and k isnt '_default'
 				ret.push k
 		return ret
 
-	get_all_backends: ->
-		backends = {}
-		for backend in @list_backends()
-			backends[backend] = @get_backend backend
-		backends.notify = @get_backend 'notify'
-		return backends
-
 	call_backend: (backend, cmd, val) ->
 		if not @config.providers[backend]
-			UNKNOWN_BACKEND backend, @list_backends()
+			UNKNOWN_BACKEND backend, @list_providers()
 		val or= @config.providers[backend].step
-		backends = @get_all_backends()
-		show = ->
-			backends[backend].get (err, perc, disabled, text) ->
-				backends.notify.notify backend, perc, disabled, text
+		self = @
+		show = =>
+			self.providers[backend].get (err, perc, disabled, text) =>
+				self.notify.notify backend, perc, disabled, text
 		switch cmd
 			when 'show', 'get'
 				show()
 			when 'inc', 'up'
-				backends[backend].inc val, show
+				@providers[backend].inc val, show
 			when 'dec', 'down'
-				backends[backend].dec val, show
+				@providers[backend].dec val, show
 			when 'set'
-				backends[backend].set val, show
+				@providers[backend].set val, show
 			when 'toggle'
-				backends[backend].toggle show
+				@providers[backend].toggle show
 			else
 				UNKNOWN_COMMAND cmd, backend
 
@@ -105,7 +105,7 @@ module.exports = class Daemon
 			sock.on 'data', (data) ->
 				str = data.toString().replace /\n/g, ''
 				args = str.split /\s+/
-				console.log "RCVD: [#{args}]"
+				console.log "<-: [#{args}]"
 				switch args[0]
 					when 'reload'
 						reload_config(args[1..])
