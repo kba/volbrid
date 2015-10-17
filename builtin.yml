@@ -1,4 +1,5 @@
 # vim: ft=yaml sw=4 ts=4 et
+debug: 2
 providers:
     _default:
         # Step to increase/decrease in percent
@@ -66,23 +67,24 @@ notify:
         # char for filled steps
         # fillchar: '0'
         fillchar: '█'
-        # char for head of steps
-        headchar: '>'
         # char for empty steps
-        emptychar: '-'
+        emptychar: '░'
         # left delimiter char
-        delimleftchar: '{'
+        left: '<span size="xx-large" font="Monospace">['
         # left delimiter char
-        delimrightchar: '}'
+        right: ']</span>'
         # Whether to use color markup
         use_colors: true
-        # Thresholds at which to change colors 
-        thresholds: [33, 66]
+        # Colors for the different levels
         colors:
-            off: '#cccccc'
-            low: '#00ff00'
-            medium: '#ffff00'
-            high: '#ff0000'
+            - '#cccccc'
+            - '#00ff00'
+            - '#77ff00'
+            - '#aaff00'
+            - '#ffff00'
+            - '#ffaa00'
+            - '#ff7700'
+            - '#ff0000'
     order:
         - "yad"
         - "notify_send"

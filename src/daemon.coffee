@@ -4,6 +4,7 @@ Fs       = require 'fs'
 MkdirP   = require 'mkdirp'
 Net      = require 'net'
 Pwuid    = require 'pwuid'
+Daemon   = require 'daemon'
 YAML     = require 'yamljs'
 {UNKNOWN_COMMAND, UNKNOWN_BACKEND} = require './errors'
 

@@ -7,24 +7,26 @@ module.exports = class Notify extends CmdExecutor
 		opts = {}
 		Extend opts, @config.notify.asciibar
 		Extend opts, @config.providers[backend].asciibar
-		bar = ''
-		fillmax = (perc / 100) * opts.width
-		for i in [0 ... fillmax]
-			ch = opts.fillchar
-			if not opts.use_colors
-				bar += ch
-				continue
-			if disabled or perc <= 0
-				bar += "<span color='#{opts.colors.off}'>#{ch}</span>"
-			else if disabled or perc <= opts.thresholds[0]
-				bar += "<span color='#{opts.colors.low}'>#{ch}</span>"
-			else if disabled or perc <= opts.thresholds[1]
-				bar += "<span color='#{opts.colors.medium}'>#{ch}</span>"
+		fillmax = Math.ceil(perc * opts.width / 100)
+		console.log fillmax
+		filled = Array(fillmax+1).join(opts.fillchar)
+		bar = opts.left
+		if not opts.use_colors
+			bar += filled
+		else
+			if perc >= 100
+				color = opts.colors[opts.colors.length-1]
 			else
-				bar += "<span color='#{opts.colors.high}'>#{ch}</span>"
-		for i in [fillmax+1 ... opts.width]
-			bar += opts.emptychar
-		return "#{opts.delimleftchar}#{bar}#{opts.delimrightchar}"
+				for c, i in opts.colors
+					break if i * (100/(opts.colors.length-1)) > perc
+					color = opts.colors[i+1]
+			bar += "<span color='#{color}'>#{filled}</span>"
+		if fillmax < opts.width
+			for i in [fillmax+1 .. opts.width]
+				bar += opts.emptychar
+		bar += opts.right
+		console.log bar.length
+		return bar
 
 	_relative_percent: (perc, backend) ->
 		return Math.min(100, perc * (100 / @config.providers[backend].max))
