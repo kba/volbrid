@@ -9,6 +9,7 @@ module.exports = class Yad extends Notify
 			"--on-top"
 			"--no-buttons"
 			"--center"
+			"--splash"
 			"--skip-taskbar"
 			"--undecorated"
 			"--sticky"
