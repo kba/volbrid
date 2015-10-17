@@ -9,6 +9,7 @@ module.exports = class Yad extends Notify
 			"--on-top"
 			"--no-buttons"
 			"--center"
+			"--splash"
 			"--skip-taskbar"
 			"--undecorated"
 			"--sticky"
@@ -22,7 +23,8 @@ module.exports = class Yad extends Notify
 					args.push "--progress-text=#{backend} #{perc}%"
 					args.push "--percentage=#{@_relative_percent(perc, backend)}"
 				when 'ascii'
-					args.push "--text=<big><tt>#{backend}: #{perc}%\n#{@_ascii_bar perc, backend}</tt></big>"
+					args.push "--text=<big><tt>#{backend}: #{perc}%" +
+						"\n#{@_ascii_bar @_relative_percent(perc, backend)}</tt></big>"
 				when 'value'
 					args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>"
 		if text
