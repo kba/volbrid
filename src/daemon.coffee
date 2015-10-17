@@ -7,7 +7,7 @@ Pwuid    = require 'pwuid'
 YAML     = require 'yamljs'
 {UNKNOWN_COMMAND, UNKNOWN_BACKEND} = require './errors'
 
-BUILTIN_CONFIG = "#{__dirname}/../dist/builtin.yml"
+BUILTIN_CONFIG = "#{__dirname}/../builtin.yml"
 ETC_CONFIG = "/etc/volbrid.yml"
 HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yml"
 
