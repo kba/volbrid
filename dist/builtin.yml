@@ -56,14 +56,33 @@ providers:
 notify:
     # timeout in ms
     timeout: 50
-    # ascii: Show an ascii progressbar, e.g. [0000000---] for 70%
+    # asciibar: Show an ascii progressbar, e.g. [0000000---] for 70%
     # progress: Hint the backend to show a graphical progress bar
     # value: Just show the value
-    style: 'ascii'
-    # char for filled steps in 'ascii' style
-    fillchar: '0'
-    # char for filled steps in 'ascii' style
-    emptychar: '-'
+    style: 'asciibar'
+    asciibar:
+        # Width of the asciibar
+        width: 20
+        # char for filled steps
+        # fillchar: '0'
+        fillchar: '█'
+        # char for head of steps
+        headchar: '>'
+        # char for empty steps
+        emptychar: '-'
+        # left delimiter char
+        delimleftchar: '{'
+        # left delimiter char
+        delimrightchar: '}'
+        # Whether to use color markup
+        use_colors: true
+        # Thresholds at which to change colors 
+        thresholds: [33, 66]
+        colors:
+            off: '#cccccc'
+            low: '#00ff00'
+            medium: '#ffff00'
+            high: '#ff0000'
     order:
         - "yad"
         - "notify_send"
