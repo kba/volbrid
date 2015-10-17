@@ -20,8 +20,6 @@ module.exports = class Daemon
 		@notify = null
 		@providers = {}
 		@config = {}
-		@reload_config()
-		@watch_config_files()
 
 	watch_config_files : () ->
 		console.log "Watching file #{HOME_CONFIG}"
@@ -78,59 +76,81 @@ module.exports = class Daemon
 				ret.push k
 		return ret
 
+	get_available_backends: () ->
+		ret = {}
+		for provider in @list_providers()
+			ret[provider] = {}
+			for backend in @config.providers[provider].order
+				ret[provider][backend] = {}
+				try
+					mod = require "./#{provider}/#{backend}"
+					loadable = new mod(@config)
+					ret[provider][backend].available = true
+				catch e
+					ret[provider][backend].available = false
+					ret[provider][backend].error = e
+		return ret
+
+
 	call_backend: (backend, cmd, val) ->
 		if not @config.providers[backend]
 			UNKNOWN_BACKEND backend, @list_providers()
+		_show = =>
+			@providers[backend].get (err, perc, disabled, text) =>
+				@notify.notify backend, perc, disabled, text
+		cmd or= 'show'
 		val or= @config.providers[backend].step
-		self = @
-		show = =>
-			self.providers[backend].get (err, perc, disabled, text) =>
-				self.notify.notify backend, perc, disabled, text
 		switch cmd
 			when 'show', 'get'
 				show()
 			when 'inc', 'up'
-				@providers[backend].inc val, show
+				@providers[backend].inc val, _show
 			when 'dec', 'down'
-				@providers[backend].dec val, show
+				@providers[backend].dec val, _show
 			when 'set'
-				@providers[backend].set val, show
+				@providers[backend].set val, _show
 			when 'toggle'
-				@providers[backend].toggle show
+				@providers[backend].toggle _show
 			else
 				UNKNOWN_COMMAND cmd, backend
 
+	handle_command: (args, sock) ->
+		switch args[0]
+			when '--reload'
+				reload_config(args[1..])
+				sock.write 'Reloaded config'
+			when '--get-backends'
+				sock.write JSON.stringify @get_available_backends()
+			when '--get-config'
+				sock.write JSON.stringify @config
+			when 'quit'
+				@stop()
+			else
+				try
+					@call_backend.apply(@, args)
+				catch e
+					console.log e
+					sock.write e
+
 	start: (already_retried) ->
-		self = @
-		server = Net.createServer (sock) ->
-			sock.on 'data', (data) ->
+		@reload_config()
+		@watch_config_files()
+		server = Net.createServer (sock) =>
+			sock.on 'data', (data) =>
 				str = data.toString().replace /\n/g, ''
 				args = str.split /\s+/
-				console.log "<-: [#{args}]"
-				switch args[0]
-					when 'reload'
-						reload_config(args[1..])
-						sock.write 'Reloaded config'
-					when 'debug'
-						sock.write YAML.stringify @config
-					when 'quit'
-						self.stop()
-					else
-						try
-							self.call_backend.apply(self, args)
-						catch e
-							console.log e
-							sock.write e
-		server.on 'listening', ->
-			return Fs.chmod(self.socket_path, 0o0777)
-		server.on 'error', ->
-			self.stop()
+				console.log "RECEIVED: [#{args}]"
+				@handle_command(args, sock)
+		server.on 'listening', =>
+			return Fs.chmod(@socket_path, 0o0777)
+		server.on 'error', =>
+			@stop()
 			if not already_retried
-				self.start(true)
-		MkdirP "/tmp/#{@username}", (err) ->
-			throw "Could not create /tmp/#{self.username}" if err
-			server.listen self.socket_path, () ->
-				console.log "Listening on #{self.socket_path}"
+				@start(true)
+		MkdirP "/tmp/#{@username}", (err) =>
+			throw "Could not create /tmp/#{@username}" if err
+			server.listen @socket_path, () =>
+				console.log "Listening on #{@socket_path}"
 
 	remove_socket: () ->
 		console.log 'Remove socket'

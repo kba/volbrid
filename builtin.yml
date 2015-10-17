@@ -23,9 +23,12 @@ providers:
         max: 250 # Order of preference for the volume backends
         order:
             - 'pulseaudio'
+            - 'amixer'
         # Configuration of the pulseaudio backend
         pulseaudio:
             sink: 0
+        amixer:
+            control: 'Master'
         # Icons for the volume states
         icons:
             off: "audio-volume-muted"
