@@ -1,5 +1,5 @@
-[ ] ascii_bar seems broken
+[x] ascii_bar seems broken
 [ ] daemonize
 [x] watchFile config
 [ ] handle uninstalled backends (brightness not needed for volume)
-[ ] Bundle etc/volbrid.yaml
+[x] Bundle etc/volbrid.yml
