@@ -19,7 +19,7 @@ docs:
 
 etc:
 	mkdir -p etc
-	sed 's/^/# /' < dist/builtin.yml > etc/volbrid.yml
+	sed 's/^/# /' < builtin.yml > etc/volbrid.yml
 
 build: docs etc
 	coffee -c -o lib src
