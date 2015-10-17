@@ -1,18 +1,18 @@
-Source: volbriosd
+Source: volbrid
 Section: x11
 Priority: optional
 Maintainer: Konstantin Baierer <konstantin.baierer@gmail.com>
 Build-Depends: debhelper (>=9), coffeescript (>=1.0), pandoc (>=1.11)
 Standards-Version: 3.9.6
-Homepage: http://github.com/kba/volbriosd
+Homepage: http://github.com/kba/volbrid
 
-Package: volbriosd
+Package: volbrid
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: xbacklight (>=1.2.1-1), libnotify (>=0.7.6-2),
  yad (>=0.27.0-1.1)
 Description: Control volume and brightness with notifications
- volbriosd offers a simple commandline interface to increase,
+ volbrid offers a simple commandline interface to increase,
  decrease and set both volume and screen brightness and shows
  the current state using notifications. It supports different
  backends for volume and brightness control as well as for
