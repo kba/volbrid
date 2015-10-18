@@ -16,17 +16,16 @@ module.exports = class Yad extends Notify
 			"--image=#{@_icon(backend, perc, disabled)}"
 			"--timeout=#{@_timeout_in_seconds()}"
 		]
-		unless disabled
-			switch @config.notify.style
-				when 'progress'
-					args.push "--progress"
-					args.push "--progress-text=#{backend} #{perc}%"
-					args.push "--percentage=#{@_relative_percent(perc, backend)}"
-				when 'ascii'
-					args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>" +
-						"\n#{@_ascii_bar @_relative_percent(perc, backend)}"
-				when 'value'
-					args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>"
+		switch @config.notify.style
+			when 'progress'
+				args.push "--progress"
+				args.push "--progress-text=#{backend} #{perc}%"
+				args.push "--percentage=#{@_relative_percent(perc, backend)}"
+			when 'ascii'
+				args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>" +
+					"\n#{@_ascii_bar(@_relative_percent(perc, backend), disabled)}"
+			when 'value'
+				args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>"
 		if text
 			args.push "--text=#{text}"
 		@_exec YAD, args, cb

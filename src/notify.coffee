@@ -10,7 +10,7 @@ module.exports = class Notify extends CmdExecutor
 		fillmax = Math.ceil(perc * opts.width / 100)
 		filled = Array(fillmax+1).join(opts.fillchar)
 		bar = opts.left
-		if not opts.use_colors
+		if not opts.use_colors or disabled
 			bar += filled
 		else
 			if perc >= 100

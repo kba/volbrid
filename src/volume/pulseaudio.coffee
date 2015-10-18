@@ -9,6 +9,9 @@ module.exports = class PulseAudio extends Backend
 
 	get: (cb) ->
 		@_exec PACMD, ['list-sinks'], (err, data) ->
+			if not data
+				console.log 'ERROR: pacmd list-sinks gave no resposne'
+				return cb 100, false
 			vol_line = data.toString().match /volume:.*\n/
 			vol_left = vol_line[0].match(/(\d+)%/)[1]
 			muted_line = data.toString().match /muted:.*\n/

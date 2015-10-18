@@ -24,7 +24,7 @@ module.exports = class Daemon
 	watch_config_files : () ->
 		console.log "Watching file #{HOME_CONFIG}"
 		@watcher = Chokidar.watch HOME_CONFIG, {
-			persistent: false
+			persistent: true
 		}
 		@watcher.on 'change', (path) =>
 			console.log "Config file #{path} changed. Reloading config"

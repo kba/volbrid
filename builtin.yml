@@ -50,7 +50,7 @@ providers:
             medium: "display-brightness-symbolic"
             high: "display-brightness-symbolic"
         xrandr:
-            outputs: ['VGA1', 'LVDS1']
+            # outputs: ['VGA1', 'LVDS1']
 
     battery:
         order:

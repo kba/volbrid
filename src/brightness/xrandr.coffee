@@ -5,8 +5,16 @@ module.exports = class Xrandr extends Backend
 	_commands: [XRANDR]
 	_modal: true
 
+
 	get: (cb) ->
-		@_exec XRANDR, ['--verbose'], (err, str) ->
+		@_exec XRANDR, ['--verbose'], (err, str) =>
+			@active_outputs = []
+			cur = ''
+			for line in str.split /\n/
+				if m = line.match /^([A-Z0-8]+)/
+					cur = m[1]
+				if m = line.match /^\s+CRTC:\s*(\d)/
+					@active_outputs.push cur
 			brightness_str = str.match(/Brightness:\s*([01]\.[0-9]{1,2})/)[1]
 			console.log "EXTRACTED: #{brightness_str}"
 			perc = 100 * parseFloat(brightness_str)
@@ -18,7 +26,11 @@ module.exports = class Xrandr extends Backend
 		console.log perc
 		perc = Math.max(0, Math.min(100, perc))
 		val = perc / 100.0
-		for output in @config.providers.brightness.xrandr.outputs
+		if @config.providers.brightness.xrandr?.outputs
+			outputs = @config.providers.brightness.xrandr?.outputs
+		else
+			outputs = @active_outputs
+		for output in outputs
 			args.push '--output'
 			args.push output
 			args.push '--brightness'
