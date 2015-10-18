@@ -29,4 +29,4 @@ module.exports = class Yad extends Notify
 					args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>"
 		if text
 			args.push "--text=#{text}"
-		@_exec YAD, args, cb, null, true
+		@_exec YAD, args, cb

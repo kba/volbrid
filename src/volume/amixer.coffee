@@ -6,7 +6,7 @@ module.exports = class Amixer extends Backend
 	_commands: [AMIXER]
 
 	get: (cb) ->
-		@_exec AMIXER, ['sget', @config.providers.volume.amixer.control], null, (data) ->
+		@_exec AMIXER, ['sget', @config.providers.volume.amixer.control], (err, data) ->
 			vol_left = data.toString().match(/(\d+)%/)[1]
 			muted_line = data.toString().match /\[off\]/
 			muted = if muted_line then yes else no

@@ -8,7 +8,6 @@ module.exports = class Notify extends CmdExecutor
 		Extend opts, @config.notify.asciibar
 		Extend opts, @config.providers[backend].asciibar
 		fillmax = Math.ceil(perc * opts.width / 100)
-		console.log fillmax
 		filled = Array(fillmax+1).join(opts.fillchar)
 		bar = opts.left
 		if not opts.use_colors
@@ -25,7 +24,6 @@ module.exports = class Notify extends CmdExecutor
 			for i in [fillmax+1 .. opts.width]
 				bar += opts.emptychar
 		bar += opts.right
-		console.log bar.length
 		return bar
 
 	_relative_percent: (perc, backend) ->

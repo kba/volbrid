@@ -1,9 +1,11 @@
 # vim: ft=yaml sw=4 ts=4 et
-debug: 2
+debug: 3
 providers:
     _default:
+        disabled: false
         # Step to increase/decrease in percent
         step: 10
+        modal: false
         # Maximum in percent
         max: 100
         # Value to consider equivalent with 'off'
@@ -39,6 +41,7 @@ providers:
     brightness:
         # Order of preference for the brightness backends
         order:
+            - 'xrandr'
             - 'xbacklight'
         # Icons for the brightness states
         icons:
@@ -46,6 +49,8 @@ providers:
             low: "display-brightness-symbolic"
             medium: "display-brightness-symbolic"
             high: "display-brightness-symbolic"
+        xrandr:
+            outputs: ['VGA1', 'LVDS1']
 
     battery:
         order:
@@ -58,6 +63,11 @@ providers:
             high: "battery-good-symbolic"
 
 notify:
+    disabled: false
+    order:
+        - "yad"
+        - "notify_send"
+        - "volnoti_show"
     # timeout in ms
     timeout: 50
     # asciibar: Show an ascii progressbar, e.g. [0000000---] for 70%
@@ -88,7 +98,3 @@ notify:
             - '#ffaa00'
             - '#ff7700'
             - '#ff0000'
-    order:
-        - "yad"
-        - "notify_send"
-        - "volnoti_show"

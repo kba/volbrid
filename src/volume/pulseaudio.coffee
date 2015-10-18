@@ -8,7 +8,7 @@ module.exports = class PulseAudio extends Backend
 	_pgrep: ['pulseaudio']
 
 	get: (cb) ->
-		@_exec PACMD, ['list-sinks'], null, (data) ->
+		@_exec PACMD, ['list-sinks'], (err, data) ->
 			vol_line = data.toString().match /volume:.*\n/
 			vol_left = vol_line[0].match(/(\d+)%/)[1]
 			muted_line = data.toString().match /muted:.*\n/
