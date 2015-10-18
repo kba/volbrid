@@ -1,4 +1,4 @@
-{NOT_IMPLEMENTED} = require './errors'
+{NOT_IMPLEMENTED} = require './common'
 CmdExecutor = require './cmd_executor'
 module.exports = class Backend extends CmdExecutor
 

@@ -15,7 +15,7 @@ module.exports = class NotifySend extends Notify
 				if text
 					args.push text
 				else
-					args.push "<big><tt>#{@_ascii_bar(perc, backend)}</tt></big>"
+					args.push "<big><tt>#{@_ascii_bar @_relative_percent perc, backend}</tt></big>"
 			when 'value'
 				args.push "#{backend} #{perc}"
 			when 'progress'

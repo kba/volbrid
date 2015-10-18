@@ -1,8 +1,11 @@
 # vim: ft=yaml sw=4 ts=4 et
+debug: 3
 providers:
     _default:
+        disabled: false
         # Step to increase/decrease in percent
         step: 10
+        modal: false
         # Maximum in percent
         max: 100
         # Value to consider equivalent with 'off'
@@ -22,9 +25,12 @@ providers:
         max: 250 # Order of preference for the volume backends
         order:
             - 'pulseaudio'
+            - 'amixer'
         # Configuration of the pulseaudio backend
         pulseaudio:
             sink: 0
+        amixer:
+            control: 'Master'
         # Icons for the volume states
         icons:
             off: "audio-volume-muted"
@@ -35,6 +41,7 @@ providers:
     brightness:
         # Order of preference for the brightness backends
         order:
+            - 'xrandr'
             - 'xbacklight'
         # Icons for the brightness states
         icons:
@@ -42,6 +49,8 @@ providers:
             low: "display-brightness-symbolic"
             medium: "display-brightness-symbolic"
             high: "display-brightness-symbolic"
+        xrandr:
+            outputs: ['VGA1', 'LVDS1']
 
     battery:
         order:
@@ -54,17 +63,38 @@ providers:
             high: "battery-good-symbolic"
 
 notify:
-    # timeout in ms
-    timeout: 50
-    # ascii: Show an ascii progressbar, e.g. [0000000---] for 70%
-    # progress: Hint the backend to show a graphical progress bar
-    # value: Just show the value
-    style: 'ascii'
-    # char for filled steps in 'ascii' style
-    fillchar: '0'
-    # char for filled steps in 'ascii' style
-    emptychar: '-'
+    disabled: false
     order:
         - "yad"
         - "notify_send"
         - "volnoti_show"
+    # timeout in ms
+    timeout: 50
+    # asciibar: Show an ascii progressbar, e.g. [0000000---] for 70%
+    # progress: Hint the backend to show a graphical progress bar
+    # value: Just show the value
+    style: 'asciibar'
+    asciibar:
+        # Width of the asciibar
+        width: 20
+        # char for filled steps
+        # fillchar: '0'
+        fillchar: '█'
+        # char for empty steps
+        emptychar: '░'
+        # left delimiter char
+        left: '<span size="xx-large" font="Monospace">['
+        # left delimiter char
+        right: ']</span>'
+        # Whether to use color markup
+        use_colors: true
+        # Colors for the different levels
+        colors:
+            - '#cccccc'
+            - '#00ff00'
+            - '#77ff00'
+            - '#aaff00'
+            - '#ffff00'
+            - '#ffaa00'
+            - '#ff7700'
+            - '#ff0000'

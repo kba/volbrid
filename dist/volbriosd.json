@@ -1,5 +1,0 @@
-{
-  "notify": {
-    "backend": "notify_send"
-  }
-}
