@@ -1,4 +1,4 @@
-Errors = require './errors'
+{NOT_IMPLEMENTED} = require './common'
 Extend = require 'node.extend'
 CmdExecutor = require './cmd_executor'
 module.exports = class Notify extends CmdExecutor
@@ -44,4 +44,4 @@ module.exports = class Notify extends CmdExecutor
 			return backend_config.icons.high
 
 	notify : (backend, perc, disabled, text, cb) ->
-		Errors.NOT_IMPLEMENTED(@constructor.name, 'notify', Notify)
+		NOT_IMPLEMENTED(@constructor.name, 'notify', Notify)

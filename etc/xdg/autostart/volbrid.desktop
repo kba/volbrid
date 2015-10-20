@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Volbrid
+Comment=Volume and Brightness notifications
+Exec=/usr/bin/volbrid
+Terminal=false
+Type=Application
+OnlyShowIn=LXDE;OPENBOX;GNOME;XFCE;
+X-GNOME-Autostart-enabled=false

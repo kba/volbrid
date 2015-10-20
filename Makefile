@@ -1,50 +1,96 @@
 DESTDIR = /
 PREFIX = usr
+ETC_PATH = $(DESTDIR)etc
+INSTALL_PATH = $(DESTDIR)$(PREFIX)
+LIBDIR = $(INSTALL_PATH)/lib/$(PKGNAME)
 
 VERSION = $(shell grep version package.json | grep -oE '[0-9\.]+')
 PKGNAME = $(shell grep name package.json |/bin/grep -o '[^"]*",'|/bin/grep -o '[^",]*')
-PANDOC = pandoc
 
-all: dist
+PANDOC = pandoc -s -t man 
+NPM = npm
+COFFEE_COMPILE = coffee -c
+
+MKDIR = mkdir -p
+MKTEMP = mktemp -d --tmpdir "make-$(PKGNAME)-XXXXXXX"
+RM = rm -rf
+LN = ln -fsrv
+CP = cp -r
+
+BIN_SOURCES = $(shell find src/bin -type f -name "*.*" |sed 's,src/,,'|sed 's,\.[^\.]\+$$,,')
+MAN_SOURCES = $(shell find src/man -type f -name "*.md"|sed 's,src/,,'|sed 's,\.md$$,.gz,')
+
+.PHONY all: build
+
+build: node_modules lib bin man LICENSE package.json
+
+node_modules:
+	$(NPM) install
 
 clean:
-	rm -rf lib
-	rm -rf man
-	rm -rf etc
+	$(RM) bin
+	$(RM) lib
+	$(RM) man
 
-docs:
-	mkdir -p man
-	$(PANDOC) -s -t man dist/volbrid.1.md |gzip > man/volbrid.1.gz
-	$(PANDOC) -s -t man dist/volbri.1.md |gzip > man/volbri.1.gz
+realclean: clean
+	$(RM) node_modules
 
-etc:
-	mkdir -p etc
-	sed 's/^/# /' < builtin.yml > etc/volbrid.yml
+bin: $(BIN_SOURCES)
 
-build: docs etc
-	coffee -c -o lib src
+bin/%: src/bin/%.*
+	@$(MKDIR) bin
+	$(CP) $< $@
+	chmod a+x $@
 
-dist: build
-	mkdir -p $(PKGNAME)-$(VERSION)
-	cp -r -t $(PKGNAME)-$(VERSION) \
-		bin \
-		dist \
-		man \
-		etc \
-		lib \
-		Makefile \
-		.npmignore \
-		package.json
-	tar czf $(PKGNAME)-$(VERSION).tar.gz $(PKGNAME)-$(VERSION)
+man: ${MAN_SOURCES}
+
+man/%.gz : src/man/%.md
+	$(MKDIR) man
+	$(PANDOC) $< |gzip > $@
+
+lib:
+	$(COFFEE_COMPILE) -o lib src/lib
+
+install: MANS   = $(shell ls man)
+install: build
+	$(MKDIR) $(LIBDIR)
+	$(CP) -t $(LIBDIR) lib node_modules LICENSE package.json
+	$(MKDIR) $(INSTALL_PATH)/share/$(PKGNAME)
+	$(CP) -t $(INSTALL_PATH)/share/$(PKGNAME) LICENSE README.md
+ifneq ("$(wildcard bin)","")
+	$(CP) -t $(LIBDIR) bin
+	$(MKDIR) $(INSTALL_PATH)/bin
+	cd $(LIBDIR) && $(LN) -t $(INSTALL_PATH)/bin $(wildcard bin/*)
+endif
+ifneq ("$(wildcard builtin/*)","")
+	$(CP) -t $(LIBDIR) builtin
+endif
+ifneq ("$(wildcard share/*)","")
+	$(CP) -t $(INSTALL_PATH) share
+endif
+ifneq ("$(wildcard etc/*)","")
+	$(MKDIR) $(ETC_PATH)
+	$(CP) -t $(ETC_PATH) $(wildcard etc/*)
+endif
+ifneq ("$(wildcard man/*)","")
+	$(MKDIR) $(INSTALL_PATH)/share/man/man1
+	$(CP) -t $(INSTALL_PATH)/share/man/man1 $(wildcard man/*)
+endif
+
+uninstall: TEMPDIR := $(shell $(MKTEMP))
+uninstall:
+	echo $(TEMPDIR)
+	$(RM) $(LIBDIR)
+	$(MAKE) DESTDIR=$(TEMPDIR)/ install
+	$(RM) $(TEMPDIR)/$(PREFIX)/lib/$(PKGNAME)
+	find $(TEMPDIR) -type f -o -type l \
+		| sed 's,$(TEMPDIR)/,$(DESTDIR),'\
+		| xargs rm
+	find $(TEMPDIR) -type d -name "$(PKGNAME)" \
+		| sed 's,$(TEMPDIR)/,$(DESTDIR),'\
+		| xargs rmdir
+	$(RM) $(TEMPDIR)
 
 distclean: clean
 	rm -rf $(PKGNAME)-$(VERSION)
 	rm -f $(PKGNAME)-$(VERSION).tar.gz
-
-install: build
-	npm install --unsafe-perm --prefix=$(DESTDIR)/$(PREFIX) --global
-	mkdir -p $(DESTDIR)/etc
-	cp -t $(DESTDIR)/etc etc/volbrid.yml
-	# find $(DESTDIR/$(PREFIX) -name "package.json" -exec sed -i "s,$(PWD),," {} \;
-	# find $(DESTDIR/$(PREFIX) -name "package.json" -exec sed -i "s,$(PWD),," {} \;
-

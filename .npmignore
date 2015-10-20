@@ -1,7 +1,6 @@
 src
 *.coffee
 debian
-dist
 .git*
 .npmignore
 Makefile

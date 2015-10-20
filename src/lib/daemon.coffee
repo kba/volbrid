@@ -8,14 +8,13 @@ Path     = require 'path'
 YAML     = require 'yamljs'
 {SOCKET_PATH, UNKNOWN_BACKEND_COMMNAND, UNKNOWN_PROVIDER} = require './common'
 
-BUILTIN_CONFIG = "#{__dirname}/../builtin.yml"
+BUILTIN_CONFIG = "#{__dirname}/../builtin/volbrid.yml"
 ETC_CONFIG = "/etc/volbrid.yml"
 HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yml"
 
 module.exports = class Daemon
 
 	constructor: (@options) ->
-		@notify = null
 		@providers = {}
 		@is_started = false
 		@active_providers = {}
@@ -58,18 +57,19 @@ module.exports = class Daemon
 			inst.name = name
 			return inst
 		catch e
-			console.log "✗ #{type} -> #{name}"
+			console.log "✗ #{type} -> #{name} [#{e}]"
 
 	load_executor: (type) ->
 		backend_config = if type is 'notify' then @config.notify else @config.providers[type]
 		if backend_config.backend
 			return @_do_require type, backend_config.backend
 		e = null
-		for modName in backend_config.order
+		for name in backend_config.order
 			try
-				return @_do_require type, modName
+				return @_do_require type, name
 			catch innerE
 				e = innerE
+				console.log "✗ #{type} -> #{name} [#{e}]"
 				continue
 		# console.log "Failed to load a backend for '#{type}': #{e}"
 
