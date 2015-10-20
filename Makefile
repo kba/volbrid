@@ -17,8 +17,9 @@ RM = rm -rf
 LN = ln -fsrv
 CP = cp -r
 
-BIN_SOURCES = $(shell find src/bin -type f -name "*.*" |sed 's,src/,,'|sed 's,\.[^\.]\+$$,,')
-MAN_SOURCES = $(shell find src/man -type f -name "*.md"|sed 's,src/,,'|sed 's,\.md$$,.gz,')
+BIN_TARGETS = $(shell find src/bin -type f -name "*.*" |sed 's,src/,,'|sed 's,\.[^\.]\+$$,,')
+MAN_TARGETS = $(shell find src/man -type f -name "*.md"|sed 's,src/,,'|sed 's,\.md$$,.gz,')
+COFFEE_TARGETS = $(shell find src/lib -type f -name "*.coffee"|sed 's,src/,,'|sed 's,\.coffee,\.js,')
 
 .PHONY all: build
 
@@ -35,21 +36,24 @@ clean:
 realclean: clean
 	$(RM) node_modules
 
-bin: $(BIN_SOURCES)
+bin: $(BIN_TARGETS)
 
 bin/%: src/bin/%.*
 	@$(MKDIR) bin
 	$(CP) $< $@
 	chmod a+x $@
 
-man: ${MAN_SOURCES}
+man: ${MAN_TARGETS}
 
 man/%.gz : src/man/%.md
-	$(MKDIR) man
+	@$(MKDIR) man
 	$(PANDOC) $< |gzip > $@
 
-lib:
-	$(COFFEE_COMPILE) -o lib src/lib
+lib: ${COFFEE_TARGETS}
+
+lib/%.js: src/lib/%.coffee
+	@$(MKDIR) $(dir $@)
+	$(COFFEE_COMPILE) -p -b $^ > $@
 
 install: MANS   = $(shell ls man)
 install: build
