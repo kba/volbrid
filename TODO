@@ -3,3 +3,4 @@
 [x] watchFile config
 [ ] handle uninstalled backends (brightness not needed for volume)
 [x] Bundle etc/volbrid.yml
+[ ] Integrate https://github.com/kevva/xdg-brightness
