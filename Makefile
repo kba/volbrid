@@ -25,7 +25,7 @@ COFFEE_TARGETS = $(shell find src/lib -type f -name "*.coffee"|sed 's,src/,,'|se
 
 build: node_modules lib bin man LICENSE package.json
 
-node_modules:
+node_modules: package.json
 	$(NPM) install
 
 clean:
