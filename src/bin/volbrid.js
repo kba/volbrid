@@ -2,11 +2,14 @@
 var options = {}
 var Daemon = require('../lib/daemon');
 var daemonize = require('daemon');
+var Minimist = require('minimist');
 
 var daemon = new Daemon(options);
 
-// TODO parse options
-var opts = {'nodaemon':1}
+var opts = Minimist(process.argv.slice(2));
+if (typeof opts.nodaemon === 'undefined')
+  opts.nodaemon = false
+
 if (!opts.nodaemon)
   daemonize();
 

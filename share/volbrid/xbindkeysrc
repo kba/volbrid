@@ -24,3 +24,13 @@
 "volbriosd brightness dec"
     m:0x40 + c:115
     Mod4 + End 
+
+#Previous Workspace
+"volbri workspace dec"
+    m:0x40 + c:43
+    Mod4 + h 
+
+#Next Workspace
+"volbri workspace inc"
+    m:0x40 + c:46
+    Mod4 + l 
