@@ -5,11 +5,11 @@ module.exports = class VolnotiShow extends Notify
 
 	_commands: [CMD]
 
-	notify: (backend, perc, disabled, text, cb) ->
+	notify: (msg, cb) ->
 		args = [
-			"-T", backend
-			@_relative_percent(perc, backend)
+			"-T", msg.provider
+			msg.format 'relative-percent'
 		]
-		if disabled
+		if msg.disabled
 			args.push "-m"
 		@_exec CMD, args, cb

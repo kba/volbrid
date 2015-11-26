@@ -16,14 +16,13 @@ module.exports = class Xrandr extends Backend
 				if m = line.match /^\s+CRTC:\s*(\d)/
 					@active_outputs.push cur
 			brightness_str = str.match(/Brightness:\s*([01]\.[0-9]{1,2})/)[1]
-			console.log "EXTRACTED: #{brightness_str}"
 			perc = 100 * parseFloat(brightness_str)
-			console.log "PARSED: #{perc}"
-			cb null, perc
+			cb null, @_createValueMessage
+				provider: 'brightness'
+				value: perc
 
-	_xrandr_brightness: (perc, cb) ->
+	_xrandr_brightness: (perc,cb) ->
 		args = []
-		console.log perc
 		perc = Math.max(0, Math.min(100, perc))
 		val = perc / 100.0
 		if @config.providers.brightness.xrandr?.outputs
@@ -37,6 +36,6 @@ module.exports = class Xrandr extends Backend
 			args.push val
 		@_exec XRANDR, args, cb, true
 
-	dec: (delta, cb) -> @get (err, perc) => @_xrandr_brightness perc+(-1)*delta, cb
-	inc: (delta, cb) -> @get (err, perc) => @_xrandr_brightness perc+(+1)*delta, cb
+	dec: (delta, cb) -> @get (err, msg) => @_xrandr_brightness msg.value+(-1)*delta, cb
+	inc: (delta, cb) -> @get (err, msg) => @_xrandr_brightness msg.value+(+1)*delta, cb
 	set: (perc, cb) -> @_xrandr_brightness perc, cb

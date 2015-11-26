@@ -28,6 +28,9 @@ module.exports = class CmdExecutor
 		else if @config.debug >= 2
 			cmd.stdout.on 'data', (data) -> console.log "[STDOUT]: #{data}"
 			cmd.stderr.on 'data', (data) -> console.log "[STDERR]: #{data}"
+		cmd.on 'error', (err) ->
+			if cb
+				cb "_exec Error: #{err}"
 		cmd.on 'exit', (err) ->
 			if cb
 				cb err, str_stdout

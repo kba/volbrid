@@ -3,25 +3,25 @@ module.exports = class NotifySend extends Notify
 
 	_commands: ['notify-send']
 
-	notify: (backend, perc, disabled, text, cb) ->
+	notify: (msg, cb) ->
 		args = [
-			"--icon=#{@_icon(backend, perc, disabled)}"
+			"--icon=#{msg.format 'icon'}"
 			"--expire-time=#{@config.notify.timeout}"
-			"--hint=string:synchronous:#{backend}"
+			"--hint=string:synchronous:#{msg.provider}"
 		]
 		switch @config.notify.style
 			when 'ascii'
-				args.push "#{backend}: #{perc}"
-				if text
-					args.push text
+				args.push "#{msg.backend}: #{msg.value}"
+				if msg.text
+					args.push msg.text
 				else
-					args.push "<big><tt>#{@_ascii_bar @_relative_percent perc, backend}</tt></big>"
+					args.push "<big><tt>#{msg.format 'ascii-bar'}</tt></big>"
 			when 'value'
-				args.push "#{backend} #{perc}"
+				args.push "#{msg.provider} #{msg.value}"
 			when 'progress'
-				args.push "--hint=int:value:#{@_relative_percent(perc, backend)}"
-				if text
-					args.push text
+				args.push "--hint=int:value:#{msg.format 'relative-percent'}"
+				if msg.text
+					args.push msg.text
 				else
-					args.push "#{backend}: #{perc}"
+					args.push "#{msg.provider}: #{msg.value}"
 		@_exec 'notify-send', args, cb

@@ -109,25 +109,29 @@ module.exports = class Daemon
 		else
 			@active_providers[provider] = true
 		_show = =>
-			@providers[provider].get (err, perc, disabled, text) =>
+			@providers[provider].get (err, msg) =>
 				@active_providers[provider] = false
-				@notify.notify provider, perc, disabled, text
+				@notify.notify msg, (err) ->
+					console.error "Notify failed", err if err
 		cmd or= 'get'
 		val or= @config.providers[provider].step
 		switch cmd
 			when 'show', 'get'
 				_show()
-			when 'inc', 'up'
+			when 'inc'
 				@providers[provider].inc val, _show
-			when 'dec', 'down'
+			when 'dec'
 				@providers[provider].dec val, _show
 			when 'set'
 				@providers[provider].set val, _show
 			when 'toggle'
 				@providers[provider].toggle _show
 			else
-				@active_providers[provider] = false
-				throw UNKNOWN_BACKEND_COMMNAND cmd, @providers[provider].name, provider
+				if typeof @providers[provider][cmd] is 'function'
+					@providers[provider][cmd] val, _show
+				else
+					@active_providers[provider] = false
+					throw UNKNOWN_BACKEND_COMMNAND cmd, @providers[provider].name, provider
 
 	handle_command: (args) ->
 		if @providers[args[0]]

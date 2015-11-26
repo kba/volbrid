@@ -8,5 +8,5 @@ module.exports =
 	UNKNOWN_BACKEND_COMMNAND: (cmd, backend, provider) ->
 		"Unknown command '#{cmd}' for backend '#{backend}' of provider '#{provider}'"
 	UNKNOWN_PROVIDER: (backend, supported_providers) ->
-		"Unknown provider '#{provider}'. Supported providers: #{supported_providers.join(', ')}"
+		"Unknown provider '#{provider}' for '#{backend}'. Supported providers: #{supported_providers.join(', ')}"
 

@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "chokidar": "^1.2.0",
+    "cli-table": "^0.3.1",
     "daemon": "^1.1.0",
     "deepmerge": "^0.2.10",
     "minimist": "^1.2.0",

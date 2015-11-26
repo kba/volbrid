@@ -1,10 +1,12 @@
+{ValueMessage, GridMessage} = require '../message'
 Notify = require '../notify'
 YAD = 'yad'
 module.exports = class Yad extends Notify
 
 	_commands: [YAD]
 
-	notify: (backend, perc, disabled, text, cb) ->
+	notify: (msg, cb) ->
+		cb 'no message to notify' unless msg
 		args = [
 			"--on-top"
 			"--no-buttons"
@@ -13,19 +15,23 @@ module.exports = class Yad extends Notify
 			"--skip-taskbar"
 			"--undecorated"
 			"--sticky"
-			"--image=#{@_icon(backend, perc, disabled)}"
 			"--timeout=#{@_timeout_in_seconds()}"
 		]
+		if msg.format 'icon'
+			args.push "--image=#{msg.format 'icon'}"
 		switch @config.notify.style
 			when 'progress'
 				args.push "--progress"
-				args.push "--progress-text=#{backend} #{perc}%"
-				args.push "--percentage=#{@_relative_percent(perc, backend)}"
+				args.push "--progress-text=#{msg.provider} #{msg.value}%"
+				args.push "--percentage=#{@msg.format 'relative-percent'}"
 			when 'ascii'
-				args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>" +
-					"\n#{@_ascii_bar(@_relative_percent(perc, backend), disabled)}"
+				if msg instanceof GridMessage
+					args.push "--text=<big><tt>#{msg.format 'ascii-grid'}</tt></big>"
+				else
+					args.push "--text=<big><tt>#{msg.provider}: #{msg.value}%</tt></big>" +
+					"\n#{msg.format 'ascii-bar'}"
 			when 'value'
-				args.push "--text=<big><tt>#{backend}: #{perc}%</tt></big>"
-		if text
-			args.push "--text=#{text}"
+				args.push "--text=<big><tt>#{msg.provider}: #{msg.value}%</tt></big>"
+		if msg.text
+			args.push "--text=#{msg.text}"
 		@_exec YAD, args, cb

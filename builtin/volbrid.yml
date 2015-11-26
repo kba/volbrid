@@ -64,16 +64,19 @@ providers:
 
     workspace:
         order:
-            - 'wmctrl_workspace'
+            - 'wmctrl'
         step: 1
+        no_icon: true
         max: 8
+        nr_cols: 3
+        nr_rows: 3
 
 notify:
     disabled: false
     order:
+        - "volnoti_show"
         - "yad"
         - "notify_send"
-        - "volnoti_show"
     # timeout in ms
     timeout: 50
     # asciibar: Show an ascii progressbar, e.g. [0000000---] for 70%
