@@ -1,16 +1,11 @@
-Chokidar = require 'chokidar'
-Extend   = require 'node.extend'
 Fs       = require 'fs'
 MkdirP   = require 'mkdirp'
 Net      = require 'net'
 Daemon   = require 'daemon'
 Path     = require 'path'
-YAML     = require 'yamljs'
 {SOCKET_PATH, UNKNOWN_BACKEND_COMMNAND, UNKNOWN_PROVIDER} = require './common'
 
-BUILTIN_CONFIG = "#{__dirname}/../builtin/volbrid.yml"
-ETC_CONFIG = "/etc/volbrid.yml"
-HOME_CONFIG = "#{process.env.HOME}/.config/volbrid.yml"
+Config = require './config'
 
 module.exports = class Daemon
 
@@ -18,32 +13,11 @@ module.exports = class Daemon
 		@providers = {}
 		@is_started = false
 		@active_providers = {}
-		@config = {}
+		@config = new Config()
+		@config.on 'reload', () =>
+			@apply_config()
 
-	watch_config_files : () ->
-		console.log "Watching file #{HOME_CONFIG}"
-		@watcher = Chokidar.watch HOME_CONFIG, {
-			persistent: true
-		}
-		@watcher.on 'change', (path) =>
-			console.log "Config file #{path} changed. Reloading config"
-			@reload_config()
-
-	unwatch_config_files: () ->
-		console.log "Unwatching file #{HOME_CONFIG}"
-		@watcher.unwatch HOME_CONFIG
-		@watcher.close()
-
-	reload_config: (args) ->
-		@config = YAML.load(BUILTIN_CONFIG)
-		for path in [ETC_CONFIG, HOME_CONFIG]
-			if Fs.existsSync path
-				console.log "Merging config from #{path}"
-				@config = Extend(true, @config, YAML.load(path))
-			for k,v of @config.providers
-				continue if k is '_default'
-				_defaultClone = Extend true, {}, @config.providers._default
-				@config.providers[k] = Extend(true, _defaultClone, v)
+	apply_config: (args) ->
 		for backend in @list_providers()
 			@providers[backend] = @load_executor backend
 		@notify = @load_executor 'notify'
@@ -59,7 +33,7 @@ module.exports = class Daemon
 		catch e
 			console.log "✗ #{type} -> #{name} [#{e}]"
 
-	load_executor: (type) ->
+	load_executor:  (type) ->
 		backend_config = if type is 'notify' then @config.notify else @config.providers[type]
 		if backend_config.backend
 			return @_do_require type, backend_config.backend
@@ -103,14 +77,23 @@ module.exports = class Daemon
 	call_backend: (provider, cmd, val) ->
 		if not @config.providers[provider]
 			throw UNKNOWN_PROVIDER provider, @list_providers()
-		if @active_providers[provider] is true
-			console.log "[SKIP #{[provider,cmd,val]}: Modal backend and still active_providers."
-			return
+		now = new Date()
+		if @active_providers[provider] instanceof Date
+			timeout = @active_providers[provider]
+			console.log "[SKIP #{[provider,cmd,val]}: Modal backend and still active_providers [Timeout #{timeout}] ."
+			if timeout.getTime() >= now.getTime()
+				return
+			else
+				console.log "[SKIP #{[provider,cmd,val]}: Modal timed out, resetting"
+				@active_providers[provider] = new Date(now.getTime() + @config.modal_timeout * 1000)
 		else
-			@active_providers[provider] = true
+			@active_providers[provider] = new Date(now.getTime() + @config.modal_timeout * 1000)
 		_show = =>
 			@providers[provider].get (err, msg) =>
 				@active_providers[provider] = false
+				if err
+					console.error err
+					return
 				@notify.notify msg, (err) ->
 					console.error "Notify failed", err if err
 		cmd or= 'get'
@@ -143,7 +126,7 @@ module.exports = class Daemon
 		else
 			switch args[0]
 				when '--reload'
-					@reload_config(args[1..])
+					@config.reload()
 					@socket.write 'Reloaded config'
 				when '--get-backends'
 					@socket.write JSON.stringify @get_available_backends()
@@ -156,27 +139,28 @@ module.exports = class Daemon
 					@socket.write JSON.stringify {Error:"Unknown command"}
 
 	start: (already_retried) ->
-		@reload_config()
-		@watch_config_files()
-		@server = Net.createServer (sock) =>
-			@socket = sock
-			@socket.on 'data', (data) =>
-				str = data.toString().replace /\n/g, ''
-				args = str.split /\s+/
-				console.log "RECEIVED: [#{args}]"
-				@handle_command(args)
-		@server.on 'listening', =>
-			@is_started = true
-			return Fs.chmod(SOCKET_PATH, 0o0777)
-		@server.on 'error', =>
-			console.log "Socket already exists, probably unclean shutdown. Removing and restarting"
-			Fs.unlinkSync SOCKET_PATH
-			if not already_retried
-				@start(true)
-		MkdirP Path.dirname(SOCKET_PATH), (err) =>
-			throw "Could not create #{Path.dirname(SOCKET_PATH)}" if err
-			@server.listen SOCKET_PATH, () =>
-				console.log "Listening on #{SOCKET_PATH}"
+		@config.once 'reload', =>
+			@apply_config()
+			@server = Net.createServer (sock) =>
+				@socket = sock
+				@socket.on 'data', (data) =>
+					str = data.toString().replace /\n/g, ''
+					args = str.split /\s+/
+					console.log "RECEIVED: [#{args}]"
+					@handle_command(args)
+			@server.on 'listening', =>
+				@is_started = true
+				return Fs.chmod(SOCKET_PATH, 0o0777)
+			@server.on 'error', =>
+				console.log "Socket already exists, probably unclean shutdown. Removing and restarting"
+				Fs.unlinkSync SOCKET_PATH
+				if not already_retried
+					@start(true)
+			MkdirP Path.dirname(SOCKET_PATH), (err) =>
+				throw "Could not create #{Path.dirname(SOCKET_PATH)}" if err
+				@server.listen SOCKET_PATH, () =>
+					console.log "Listening on #{SOCKET_PATH}"
+		@config.reload()
 
 	stop: ->
 		@unwatch_config_files()
