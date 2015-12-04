@@ -21,7 +21,18 @@ BIN_TARGETS = $(shell find src/bin -type f -name "*.*" |sed 's,src/,,'|sed 's,\.
 MAN_TARGETS = $(shell find src/man -type f -name "*.md"|sed 's,src/,,'|sed 's,\.md$$,.gz,')
 COFFEE_TARGETS = $(shell find src/lib -type f -name "*.coffee"|sed 's,src/,,'|sed 's,\.coffee,\.js,')
 
+RUN_SCRIPT = bin/volbrid --nodaemon --noconfig
+
 .PHONY all: build
+
+supervisor_installed:
+	which supervisor || $(NPM) install --global supervisor
+
+dev-run: supervisor_installed
+	supervisor -w src/lib,builtin -e coffee,yml -x $(MAKE) run
+
+run: build
+	$(RUN_SCRIPT)
 
 build: node_modules lib bin man LICENSE package.json
 
