@@ -1,5 +1,6 @@
 # vim: ft=yaml sw=4 ts=4 et
-debug: 3
+debug: 0
+modal_timeout: 3
 providers:
     _default:
         disabled: false
@@ -74,15 +75,15 @@ providers:
 notify:
     disabled: false
     order:
-        - "volnoti_show"
         - "yad"
+        - "volnoti_show"
         - "notify_send"
     # timeout in ms
     timeout: 50
     # asciibar: Show an ascii progressbar, e.g. [0000000---] for 70%
     # progress: Hint the backend to show a graphical progress bar
     # value: Just show the value
-    style: 'asciibar'
+    style: 'ascii'
     asciibar:
         # Width of the asciibar
         width: 20
