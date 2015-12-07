@@ -1,10 +1,7 @@
 #!/usr/bin/env node
-var options = {}
 var Daemon = require('../lib/daemon');
 var daemonize = require('daemon');
 var Minimist = require('minimist');
-
-var daemon = new Daemon(options);
 
 var opts = Minimist(process.argv.slice(2));
 if (typeof opts.nodaemon === 'undefined')
@@ -12,6 +9,8 @@ if (typeof opts.nodaemon === 'undefined')
 
 if (!opts.nodaemon)
   daemonize();
+
+var daemon = new Daemon(opts);
 
 process.on('SIGINT', function() {
   console.log('Received SIGINT');
