@@ -1,5 +1,6 @@
 Backend = require '../backend'
 
+XDOTOOL = 'xdotool'
 WMCTRL = 'wmctrl'
 module.exports = class Wmctrl extends Backend
 
@@ -17,9 +18,9 @@ module.exports = class Wmctrl extends Backend
 				windows_per_desktop[k] or= {} for k of windows_per_desktop
 				for line in data.split("\n")
 					[wid, desktop_num, host] = line.split(/\s+/, 3)
+					continue if typeof desktop_num is 'undefined'
 					desktop_num = parseInt desktop_num
-					continue unless desktop_num
-					continue if desktop_num is -1
+					continue if desktop_num < 0
 					title = line.split(host)[1].trim()
 					continue unless title
 					windows_per_desktop[desktop_num] or= {}
@@ -33,7 +34,7 @@ module.exports = class Wmctrl extends Backend
 					max: max_workspace
 					windows_per_desktop: windows_per_desktop
 
-	_s: (arg, cb) ->
+	_s: (arg, move, cb) ->
 		@get (err, msg) =>
 			return cb err if err
 			new_workspace = msg.value + arg
@@ -41,13 +42,25 @@ module.exports = class Wmctrl extends Backend
 			if new_workspace < 0
 				new_workspace = msg.max + 1 + new_workspace
 			else if new_workspace > msg.max
-				new_workspace = new_workspace + 1 - msg.max
-			args = ['-s', new_workspace]
-			@_exec WMCTRL, args, cb
+				new_workspace = new_workspace - msg.max - 1
+			xdotool_cmds = []
+			if move
+				xdotool_cmds.push 'getactivewindow'
+				xdotool_cmds.push 'set_desktop_for_window'
+				xdotool_cmds.push '%1'
+				xdotool_cmds.push new_workspace
+			xdotool_cmds.push 'set_desktop'
+			xdotool_cmds.push new_workspace
+			console.log xdotool_cmds
+			@_exec XDOTOOL, xdotool_cmds, cb
 
-	inc: (perc, cb)  -> @_s parseInt(perc), cb
-	dec: (perc, cb)  -> @_s -1 * parseInt(perc), cb
-	up: (perc, cb) -> @_s -1 * @config.providers['workspace'].nr_cols, cb
-	down: (perc, cb)   -> @_s @config.providers['workspace'].nr_cols, cb
-	set: (perc, cb)  -> @_s perc, cb
-	toggle: (cb) -> cb()
+	inc:     (val, cb) -> @_s parseInt(val), false, cb
+	dec:     (val, cb) -> @_s -1 * parseInt(val), false, cb
+	up:      (val, cb) -> @_s -1 * @config.providers['workspace'].nr_cols, false, cb
+	down:    (val, cb) -> @_s @config.providers['workspace'].nr_cols, false, cb
+	move_next: (val, cb) -> @_s parseInt(val), true, cb
+	move_prev: (val, cb) -> @_s -1 * parseInt(val), true, cb
+	move_up:   (val, cb) -> @_s -1 * @config.providers['workspace'].nr_cols, true, cb
+	move_down: (val, cb) -> @_s @config.providers['workspace'].nr_cols, true, cb
+	set:     (val, cb) -> @_s val, cb
+	toggle:  (cb) -> cb()

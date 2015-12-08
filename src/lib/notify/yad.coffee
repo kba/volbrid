@@ -32,6 +32,12 @@ module.exports = class Yad extends Notify
 					"\n#{msg.format 'ascii-bar'}"
 			when 'value'
 				args.push "--text=<big><tt>#{msg.provider}: #{msg.value}%</tt></big>"
+			else
+				throw new Error("Unknown style #{@config.notify.style}")
 		if msg.text
 			args.push "--text=#{msg.text}"
-		@_exec YAD, args, cb
+		@_exec YAD, args, (err) -> 
+			if err and err isnt 70
+				return cb err
+			return cb()
+

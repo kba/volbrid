@@ -77,26 +77,35 @@ class GridMessage extends ValueMessage
 		desktop_idx = 0
 		out = ''
 		color= '#ff0000'
-		for y in [0 ... @nr_rows]
-			for x in [0 ... @nr_cols * 6]
-				out += '-'
+		color2= '#ffff00'
+		color_wincount = '#888888'
+		sym_highlight_left = '▶'
+		sym_highlight_right = '◀'
+		for y in [0 .. @nr_rows]
+			out += "|"
+			for x in [0 ... @nr_cols * 6 + (@nr_cols - 1)]
+				if (x+1) % 7 == 0
+					out += '+'
+				else 
+					out+= '-'
+			out += '|'
 			out += '\n'
+			break if y == @nr_rows
+			out += '|'
 			for x in [0 ... @nr_cols]
 				if @value == desktop_idx
-					sym = "<span color='#{color}'>*</span>#{desktop_idx}<span color='#{color}'>*</span>"
+					sym = "<span color='#{color}'>#{sym_highlight_left}</span><span color='#{color2}'>#{desktop_idx}</span><span color='#{color}'>#{sym_highlight_right}</span>"
 				else
 					sym = " #{desktop_idx} "
 				if @windows_per_desktop[desktop_idx]
-					out += "#{sym}[#{@windows_per_desktop[desktop_idx]}]"
-				else 
-					out += " #{sym}  "
+					win_count = "<span color='#{color_wincount}'>:#{@windows_per_desktop[desktop_idx]}</span>"
+				else
+					win_count = "  "
+				out += " #{sym}#{win_count}"
 				if x < @nr_cols
 					out += "|"
 				desktop_idx += 1
 			out += '\n'
-		for x in [0 ... @nr_cols * 6]
-			out += '-'
-		out += '\n'
 		return out
 
 module.exports = {
