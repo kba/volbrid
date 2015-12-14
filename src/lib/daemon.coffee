@@ -13,9 +13,7 @@ module.exports = class Daemon
 		@providers = {}
 		@is_started = false
 		@active_providers = {}
-		@config = new Config()
-		@config.on 'reload', () =>
-			@apply_config()
+		@config = new Config(@options)
 
 	apply_config: (args) ->
 		for backend in @list_providers()
@@ -78,19 +76,17 @@ module.exports = class Daemon
 		if not @config.providers[provider]
 			throw UNKNOWN_PROVIDER provider, @list_providers()
 		now = new Date()
-		if @active_providers[provider] instanceof Date
-			timeout = @active_providers[provider]
+		timeout = @active_providers[provider]
+		if timeout instanceof Date
 			console.log "[SKIP #{[provider,cmd,val]}: Modal backend and still active_providers [Timeout #{timeout}] ."
 			if timeout.getTime() >= now.getTime()
 				return
 			else
 				console.log "[SKIP #{[provider,cmd,val]}: Modal timed out, resetting"
-				@active_providers[provider] = new Date(now.getTime() + @config.modal_timeout * 1000)
-		else
-			@active_providers[provider] = new Date(now.getTime() + @config.modal_timeout * 1000)
+		@active_providers[provider] = new Date(now.getTime() + @config.modal_timeout * 1000)
 		_show = =>
 			@providers[provider].get (err, msg) =>
-				@active_providers[provider] = false
+				delete @active_providers[provider]
 				if err
 					console.error err
 					return
@@ -113,7 +109,7 @@ module.exports = class Daemon
 				if typeof @providers[provider][cmd] is 'function'
 					@providers[provider][cmd] val, _show
 				else
-					@active_providers[provider] = false
+					delete @active_providers[provider]
 					throw UNKNOWN_BACKEND_COMMNAND cmd, @providers[provider].name, provider
 
 	handle_command: (args) ->
@@ -138,31 +134,34 @@ module.exports = class Daemon
 				else
 					@socket.write JSON.stringify {Error:"Unknown command"}
 
-	start: (already_retried) ->
-		@config.once 'reload', =>
-			@apply_config()
-			@server = Net.createServer (sock) =>
-				@socket = sock
-				@socket.on 'data', (data) =>
-					str = data.toString().replace /\n/g, ''
-					args = str.split /\s+/
-					console.log "RECEIVED: [#{args}]"
-					@handle_command(args)
-			@server.on 'listening', =>
-				@is_started = true
-				return Fs.chmod(SOCKET_PATH, 0o0777)
-			@server.on 'error', =>
-				console.log "Socket already exists, probably unclean shutdown. Removing and restarting"
-				Fs.unlinkSync SOCKET_PATH
-				if not already_retried
-					@start(true)
-			MkdirP Path.dirname(SOCKET_PATH), (err) =>
-				throw "Could not create #{Path.dirname(SOCKET_PATH)}" if err
-				@server.listen SOCKET_PATH, () =>
-					console.log "Listening on #{SOCKET_PATH}"
+	_do_start: (already_retried) ->
+		@apply_config()
+		@server = Net.createServer (sock) =>
+			@socket = sock
+			@socket.on 'data', (data) =>
+				str = data.toString().replace /\n/g, ''
+				args = str.split /\s+/
+				console.log "RECEIVED: [#{args}]"
+				@handle_command(args)
+		@server.on 'listening', =>
+			@is_started = true
+			return Fs.chmod(SOCKET_PATH, 0o0777)
+		@server.on 'error', =>
+			console.log "Socket already exists, probably unclean shutdown. Removing and restarting"
+			Fs.unlinkSync SOCKET_PATH
+			if not already_retried
+				@_do_start(true)
+		MkdirP Path.dirname(SOCKET_PATH), (err) =>
+			throw "Could not create #{Path.dirname(SOCKET_PATH)}" if err
+			@server.listen SOCKET_PATH, () =>
+				console.log "Listening on #{SOCKET_PATH}"
+
+	start: () ->
+		@config.once 'reload', => @_do_start()
 		@config.reload()
+		@config.on 'reload', => @apply_config()
 
 	stop: ->
-		@unwatch_config_files()
+		@config.removeAllListeners()
 		console.log 'Shutting down server'
 		@server.close()
